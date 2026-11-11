@@ -41,6 +41,10 @@ class DictionaryBackupManagerTest {
             probe = { longArrayOf() },
         )
 
+        if (result is DictionaryBackupManager.ImportResult.Failure) {
+            error("IMPORT FAILURE: ${result.message}")
+        }
+
         result shouldBe DictionaryBackupManager.ImportResult.Success(
             DictionaryBackupManager.ImportReport(imported = listOf("jmdict")),
         )
