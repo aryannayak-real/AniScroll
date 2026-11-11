@@ -14,15 +14,15 @@ object GoogleCloudOAuthConfiguration {
 
     val instructions: List<String> = listOf(
         "Open the same Google Cloud project used by iOS/\u30C3\u30C4 sync and make sure the Google Drive API is enabled.",
-        "Open Google Auth Platform -> Clients in the $googleCloudConsoleLinkLabel, click CREATE CLIENT, and select application type TVs and Limited Input devices. If your console still shows the older navigation, use APIs & Services -> Credentials -> Create Credentials -> OAuth client ID.",
+        "Open Google Auth Platform -> Clients in the $GOOGLE_CLOUD_CONSOLE_LINK_LABEL, click CREATE CLIENT, and select application type TVs and Limited Input devices. If your console still shows the older navigation, use APIs & Services -> Credentials -> Create Credentials -> OAuth client ID.",
         "Paste that client ID and client secret here. Do not create an Android OAuth client for this flow.",
         "Press Connect Google Drive, open the verification URL, and enter the displayed device code.",
-        "If authorization has trouble while app is in the background, open the $googleDeviceLinkLabel on another device and enter the device code shown here.",
+        "If authorization has trouble while app is in the background, open the $GOOGLE_DEVICE_LINK_LABEL on another device and enter the device code shown here.",
         "Authorize the same Google Account whose Drive contains the \u30C3\u30C4 sync folder.",
     )
 
     val INSTRUCTION_LINKS: Map<String, String> = mapOf(
-        googleCloudConsoleLinkLabel to googleCloudConsoleUrl,
-        googleDeviceLinkLabel to googleDeviceUrl,
+        GOOGLE_CLOUD_CONSOLE_LINK_LABEL to GOOGLE_CLOUD_CONSOLE_URL,
+        GOOGLE_DEVICE_LINK_LABEL to GOOGLE_DEVICE_URL,
     )
 }

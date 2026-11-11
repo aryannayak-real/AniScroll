@@ -170,15 +170,15 @@ class EpisodeOptionsDialogScreenModel(
         screenModelScope.launchIO {
             val episode = Injekt.get<GetEpisode>().await(episodeId)!!
             val anime = Injekt.get<GetAnime>().await(animeId)!!
-            val source = sourceManager.getOrStub(sourceId)
+            val animeSource = sourceManager.getOrStub(sourceId)
 
             _episode.update { _ -> episode }
             _anime.update { _ -> anime }
-            source = source
+            source = animeSource
 
             val hosterListResult = withIOContext {
                 try {
-                    Result.success(EpisodeLoader.getHosters(episode, anime, source))
+                    Result.success(EpisodeLoader.getHosters(episode, anime, animeSource))
                 } catch (e: Exception) {
                     Result.failure(e)
                 }
@@ -189,8 +189,8 @@ class EpisodeOptionsDialogScreenModel(
                 return@launchIO
             }
 
-            val hosterList = hosterListResult.getOrThrow()
-            hosterList = hosterList
+            val loadedHosterList = hosterListResult.getOrThrow()
+            hosterList = loadedHosterList
             _hosterExpandedList.update { _ ->
                 List(hosterList.size) { true }
             }
