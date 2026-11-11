@@ -222,7 +222,7 @@ class EpisodeOptionsDialogScreenModel(
                             if (prefIndex != -1) {
                                 if (hasFoundPreferredVideo.compareAndSet(false, true)) {
                                     val success =
-                                        loadVideo(source, hosterState.videoList[prefIndex], hosterIdx, prefIndex)
+                                        loadVideo(animeSource, hosterState.videoList[prefIndex], hosterIdx, prefIndex)
                                     if (!success) {
                                         hasFoundPreferredVideo.set(false)
                                     }
@@ -244,7 +244,7 @@ class EpisodeOptionsDialogScreenModel(
 
                     val video = (hosterStateList[hosterIdx] as HosterState.Ready).videoList[videoIdx]
 
-                    loadVideo(source, video, hosterIdx, videoIdx)
+                    loadVideo(animeSource, video, hosterIdx, videoIdx)
                 }
             } catch (e: CancellationException) {
                 throw e
