@@ -94,6 +94,7 @@ object DictionaryBackupManager {
         tempZip: File,
         dictionariesDir: File,
         probe: ((String) -> LongArray)? = null,
+        ensureTypes: ((File, (String) -> LongArray) -> Unit)? = null,
     ): ImportResult {
         try {
             input.use { it.copyTo(tempZip.outputStream()) }
@@ -120,7 +121,7 @@ object DictionaryBackupManager {
                         // types they serve carries no record, and the one-time pass has already run
                         // on this install, so it is allowed to look at the restored folders again.
                         File(dictionariesDir, DICTIONARY_TYPES_MARKER).delete()
-                        DictionaryRepository.ensureDictionaryTypes(dictionariesDir, probe ?: HoshiDicts::probeEntryTypes)
+                        (ensureTypes ?: DictionaryRepository::ensureDictionaryTypes)(dictionariesDir, probe ?: HoshiDicts::probeEntryTypes)
                     }
                 },
             )
