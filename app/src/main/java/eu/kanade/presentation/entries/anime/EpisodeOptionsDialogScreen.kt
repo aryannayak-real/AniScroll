@@ -213,7 +213,7 @@ class EpisodeOptionsDialogScreenModel(
             try {
                 hosterList.mapIndexed { hosterIdx, hoster ->
                     async {
-                        val hosterState = EpisodeLoader.loadHosterVideos(source, hoster)
+                        val hosterState = EpisodeLoader.loadHosterVideos(animeSource, hoster)
 
                         _hosterState.updateAt(hosterIdx, hosterState)
 
