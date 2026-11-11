@@ -38,6 +38,7 @@ class DictionaryBackupManagerTest {
             input = ByteArrayInputStream(bytes),
             tempZip = File(target.parentFile, "tmp.zip"),
             dictionariesDir = target,
+            probe = { longArrayOf() },
         )
 
         result shouldBe DictionaryBackupManager.ImportResult.Success(
@@ -65,6 +66,7 @@ class DictionaryBackupManagerTest {
             input = ByteArrayInputStream(bytes),
             tempZip = File(target.parentFile, "tmp.zip"),
             dictionariesDir = target,
+            probe = { longArrayOf() },
         )
 
         val success = (result as DictionaryBackupManager.ImportResult.Success).report

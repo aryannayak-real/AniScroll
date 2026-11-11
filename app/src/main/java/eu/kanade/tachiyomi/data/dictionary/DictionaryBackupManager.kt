@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.data.dictionary
 
 import chimahon.DictionaryRepository
+import chimahon.HoshiDicts
 import chimahon.dictionary.DICTIONARY_TYPES_MARKER
 import chimahon.dictionary.readDictionaryIndex
 import kotlinx.serialization.Serializable
@@ -92,6 +93,7 @@ object DictionaryBackupManager {
         input: InputStream,
         tempZip: File,
         dictionariesDir: File,
+        probe: ((String) -> LongArray)? = null,
     ): ImportResult {
         try {
             input.use { it.copyTo(tempZip.outputStream()) }
@@ -118,7 +120,7 @@ object DictionaryBackupManager {
                         // types they serve carries no record, and the one-time pass has already run
                         // on this install, so it is allowed to look at the restored folders again.
                         File(dictionariesDir, DICTIONARY_TYPES_MARKER).delete()
-                        DictionaryRepository.ensureDictionaryTypes(dictionariesDir)
+                        DictionaryRepository.ensureDictionaryTypes(dictionariesDir, probe ?: HoshiDicts::probeEntryTypes)
                     }
                 },
             )
