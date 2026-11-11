@@ -48,7 +48,7 @@ data class PaddleOcrResult(
 class PaddleOcrEngine(
     context: Context,
 ) : chimahon.ocr.OcrEngine, Closeable {
-    private val TAG = "PaddleOcrEngine"
+    private val tag = "PaddleOcrEngine"
     private val appContext = context.applicationContext
 
     override val name: String = "Paddle OCR"
@@ -103,7 +103,7 @@ class PaddleOcrEngine(
 
         val abi = supportedAbi()
         if (abi == null) {
-            Log.e(TAG, "Unsupported ABI: ${Build.SUPPORTED_ABIS.joinToString()}")
+            Log.e(tag, "Unsupported ABI: ${Build.SUPPORTED_ABIS.joinToString()}")
             return false
         }
         // Dependency order matters: STL + OpenMP first, engine last.
@@ -114,9 +114,9 @@ class PaddleOcrEngine(
             System.load(File(libDir, "libc++_shared.so").absolutePath)
             System.load(File(libDir, "libomp.so").absolutePath)
             System.load(File(libDir, "libpaddle_ocr.so").absolutePath)
-            Log.i(TAG, "libpaddle_ocr.so loaded successfully")
+            Log.i(tag, "libpaddle_ocr.so loaded successfully")
         } catch (e: UnsatisfiedLinkError) {
-            Log.e(TAG, "Failed to load libpaddle_ocr.so", e)
+            Log.e(tag, "Failed to load libpaddle_ocr.so", e)
             return false
         }
 
@@ -133,9 +133,9 @@ class PaddleOcrEngine(
         if (success) {
             isInitialized = true
             val elapsed = SystemClock.elapsedRealtime() - start
-            Log.i(TAG, "Paddle OCR engine initialized in ${elapsed}ms")
+            Log.i(tag, "Paddle OCR engine initialized in ${elapsed}ms")
         } else {
-            Log.e(TAG, "Failed to initialize Paddle OCR engine from ${modelDir.absolutePath}")
+            Log.e(tag, "Failed to initialize Paddle OCR engine from ${modelDir.absolutePath}")
         }
         return success
     }
@@ -157,7 +157,7 @@ class PaddleOcrEngine(
             val bitmap = try {
                 OcrBitmapDecoder.decode(bytes)
             } catch (e: Exception) {
-                Log.w(TAG, "Failed to decode image for paddle OCR", e)
+                Log.w(tag, "Failed to decode image for paddle OCR", e)
                 return emptyList()
             }
             return try {
@@ -203,7 +203,7 @@ class PaddleOcrEngine(
                 numThreads = options.numThreads,
             )
             val result = parseOutput(raw, language, software.width, software.height)
-            Log.i(TAG, "recognize: ${result.benchmark}")
+            Log.i(tag, "recognize: ${result.benchmark}")
             return result
         } finally {
             if (software !== bitmap) software.recycle()
@@ -332,7 +332,7 @@ class PaddleOcrEngine(
                     } catch (_: Throwable) {
                     }
                     isInitialized = false
-                    Log.i(TAG, "Paddle OCR Engine closed")
+                    Log.i(tag, "Paddle OCR Engine closed")
                 }
             }
         } finally {
