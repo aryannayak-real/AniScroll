@@ -103,8 +103,10 @@ internal fun List<NativeSubtitleRectangle>.mergedHighlightBounds(start: Int, end
         } else {
             val previous = lines[line]
             lines[line] = Rect(
-                minOf(previous.left, rect.left), minOf(previous.top, rect.top),
-                maxOf(previous.right, rect.right), maxOf(previous.bottom, rect.bottom),
+                minOf(previous.left, rect.left),
+                minOf(previous.top, rect.top),
+                maxOf(previous.right, rect.right),
+                maxOf(previous.bottom, rect.bottom),
             )
         }
     }

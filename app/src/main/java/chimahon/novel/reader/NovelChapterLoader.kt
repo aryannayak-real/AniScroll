@@ -2,10 +2,10 @@ package chimahon.novel.reader
 
 import android.content.Context
 import chimahon.novel.cache.NovelChapterCache
+import chimahon.novel.data.BookStorage
 import chimahon.novel.download.NovelDownloadProvider
 import chimahon.novel.manager.NovelSourceManager
 import chimahon.novel.ui.detail.SourceChapterBookBuilder
-import chimahon.novel.data.BookStorage
 import eu.kanade.tachiyomi.sourcenovel.NovelSource
 import eu.kanade.tachiyomi.sourcenovel.model.ChapterContent
 import eu.kanade.tachiyomi.sourcenovel.model.SNChapter

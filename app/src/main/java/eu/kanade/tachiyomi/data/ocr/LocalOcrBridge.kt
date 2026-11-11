@@ -16,6 +16,7 @@ class LocalOcrBridge(private val context: Context) {
     private val engineMutex = Mutex()
 
     val isAvailable: Boolean get() = BuildConfig.HAS_LOCAL_OCR
+
     @Volatile
     var isInitialized: Boolean = false
         private set

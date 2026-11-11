@@ -26,12 +26,12 @@ import eu.kanade.presentation.components.AppBarActions
 import eu.kanade.presentation.components.AppBarTitle
 import eu.kanade.presentation.components.BulkSelectionToolbar
 import eu.kanade.presentation.components.SearchToolbar
-import tachiyomi.domain.history.model.SearchHistory
-import tachiyomi.domain.entries.anime.model.Anime
-import eu.kanade.tachiyomi.ui.browse.animesource.feed.AnimeSourceFeedUI
 import eu.kanade.tachiyomi.ui.browse.BulkFavoriteAnimeScreenModel
+import eu.kanade.tachiyomi.ui.browse.animesource.feed.AnimeSourceFeedUI
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
+import tachiyomi.domain.entries.anime.model.Anime
+import tachiyomi.domain.history.model.SearchHistory
 import tachiyomi.i18n.MR
 import tachiyomi.i18n.kmk.KMR
 import tachiyomi.i18n.sy.SYMR

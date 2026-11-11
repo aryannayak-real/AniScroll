@@ -4,7 +4,6 @@ import android.graphics.Bitmap
 import android.os.Bundle
 import android.os.SystemClock
 import android.util.Log
-import chimahon.novel.data.BookStorage
 import android.webkit.WebView
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Canvas
@@ -34,9 +33,10 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import chimahon.DictionaryRepository
+import chimahon.novel.data.BookStorage
+import chimahon.novel.ui.reader.NovelReaderActivity
 import chimahon.ocr.OcrLanguage
 import chimahon.ocr.OcrResult
-import chimahon.novel.ui.reader.NovelReaderActivity
 import eu.kanade.tachiyomi.data.ocr.recognizePage
 import eu.kanade.tachiyomi.ui.dictionary.DictionaryPopupWebViewWarmup
 import eu.kanade.tachiyomi.ui.dictionary.DictionaryPreferences
@@ -248,7 +248,7 @@ class ChimaReaderActivity : NovelReaderActivity() {
         if (!readerPreferences.readWithVolumeKeys().get()) {
             return false
         }
-        
+
         val inverted = readerPreferences.readWithVolumeKeysInverted().get()
         val finalForward = if (inverted) !forward else forward
         return super.handleVolumeKey(finalForward)
@@ -257,7 +257,7 @@ class ChimaReaderActivity : NovelReaderActivity() {
     override fun onKeyDown(keyCode: Int, event: android.view.KeyEvent): Boolean {
         if (isPopupActive) return super.onKeyDown(keyCode, event)
         if (!readerPreferences.readWithVolumeKeys().get()) return super.onKeyDown(keyCode, event)
-        
+
         when (keyCode) {
             android.view.KeyEvent.KEYCODE_VOLUME_UP -> return true
             android.view.KeyEvent.KEYCODE_VOLUME_DOWN -> return true
@@ -283,12 +283,12 @@ class ChimaReaderActivity : NovelReaderActivity() {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text("Use volume keys to navigate", style = MaterialTheme.typography.bodyMedium)
                 Switch(
                     checked = volumeKeys,
-                    onCheckedChange = { readerPreferences.readWithVolumeKeys().set(it) }
+                    onCheckedChange = { readerPreferences.readWithVolumeKeys().set(it) },
                 )
             }
 
@@ -296,12 +296,12 @@ class ChimaReaderActivity : NovelReaderActivity() {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text("Invert volume keys", style = MaterialTheme.typography.bodyMedium)
                     Switch(
                         checked = volumeKeysInverted,
-                        onCheckedChange = { readerPreferences.readWithVolumeKeysInverted().set(it) }
+                        onCheckedChange = { readerPreferences.readWithVolumeKeysInverted().set(it) },
                     )
                 }
             }
@@ -400,7 +400,11 @@ class ChimaReaderActivity : NovelReaderActivity() {
         lookupState = LookupState(word, sentence, x, y, w, h, vertical, profile, screenshot, sentenceOffset)
 
         lifecycleScope.launch(Dispatchers.Default) {
-            val result = try { lookupDeferred?.await() } catch (_: Exception) { null }
+            val result = try {
+                lookupDeferred?.await()
+            } catch (_: Exception) {
+                null
+            }
             val firstMatched = result?.results?.firstOrNull()?.matched
             if (firstMatched != null && resolveAnchorFromWebView) {
                 val matchOffset = word.indexOf(firstMatched).coerceAtLeast(0)
@@ -475,7 +479,7 @@ class ChimaReaderActivity : NovelReaderActivity() {
         val mediaInfo = readerViewModel?.let { vm ->
             chimahon.MediaInfo(
                 mangaTitle = vm.document.title ?: "",
-                chapterName = vm.getCurrentChapterTitle() ?: ""
+                chapterName = vm.getCurrentChapterTitle() ?: "",
             )
         }
         eu.kanade.presentation.theme.TachiyomiTheme {

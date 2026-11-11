@@ -1,9 +1,9 @@
 package eu.kanade.tachiyomi.data.backup.restore.restorers
 
 import android.content.Context
-import chimahon.novel.interactor.RegisterLocalNovelHome
 import chimahon.novel.data.BookStorage
 import chimahon.novel.data.NovelCategory
+import chimahon.novel.interactor.RegisterLocalNovelHome
 import eu.kanade.tachiyomi.data.backup.models.BackupNovel
 import eu.kanade.tachiyomi.data.backup.models.BackupNovelCategory
 import eu.kanade.tachiyomi.data.backup.models.toNovelChapter
@@ -11,10 +11,10 @@ import logcat.LogPriority
 import tachiyomi.core.common.util.system.logcat
 import tachiyomi.domain.novel.model.Novel
 import tachiyomi.domain.novel.model.NovelUpdate
+import tachiyomi.domain.novel.repository.NovelCategoryRepository
 import tachiyomi.domain.novel.repository.NovelChapterRepository
 import tachiyomi.domain.novel.repository.NovelHistoryRepository
 import tachiyomi.domain.novel.repository.NovelReadingStatsRepository
-import tachiyomi.domain.novel.repository.NovelCategoryRepository
 import tachiyomi.domain.novel.repository.NovelRepository
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -151,8 +151,8 @@ class NovelRestorer(
 
         if (backupNovel.lastModified > 0) {
             runCatching {
-                            // chapterNumber order: bookmark indices are written against the
-                            // number-sorted spine everywhere (open, sync, loader).
+                // chapterNumber order: bookmark indices are written against the
+                // number-sorted spine everywhere (open, sync, loader).
                 val ordered = novelChapterRepository.getChaptersByNovelId(novelId)
                     .sortedBy { it.chapterNumber }
                 val target = ordered.getOrNull(backupNovel.chapterIndex) ?: return@runCatching
@@ -226,7 +226,7 @@ class NovelRestorer(
                             name = backupCategory.name,
                             order = backupCategory.order.toInt(),
                             flags = backupCategory.flags,
-                        )
+                        ),
                     )
                 }
             }

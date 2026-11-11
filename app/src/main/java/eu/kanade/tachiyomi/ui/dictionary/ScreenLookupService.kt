@@ -14,7 +14,6 @@ import android.graphics.Color
 import android.graphics.PixelFormat
 import android.graphics.drawable.GradientDrawable
 import android.hardware.display.DisplayManager
-import android.view.Display
 import android.hardware.display.VirtualDisplay
 import android.media.Image
 import android.media.ImageReader
@@ -26,6 +25,7 @@ import android.os.IBinder
 import android.os.Looper
 import android.provider.Settings
 import android.util.DisplayMetrics
+import android.view.Display
 import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
@@ -68,8 +68,11 @@ class ScreenLookupService : Service() {
 
     @Volatile private var projection: MediaProjection? = null
     private var projectionCallback: MediaProjection.Callback? = null
+
     @Volatile private var imageReader: ImageReader? = null
+
     @Volatile private var virtualDisplay: VirtualDisplay? = null
+
     @Volatile private var virtualDisplaySize: CaptureSize? = null
     private var lastCaptureError: String? = null
     private var floatingButton: View? = null

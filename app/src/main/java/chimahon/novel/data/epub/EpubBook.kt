@@ -92,7 +92,7 @@ data class EpubBook(
             val charCount = countCharacters(content)
             chapterLengthCache[index] = charCount
             charCount
-        } catch(e: Exception) {
+        } catch (e: Exception) {
             0
         }
     }
@@ -136,7 +136,7 @@ data class EpubBook(
     }
 
     /**
-     * Converts an absolute character count back into a 
+     * Converts an absolute character count back into a
      * specific chapter index and decimal progress (0.0 to 1.0) for that chapter.
      */
     fun convertCharsToProgress(totalExploredChars: Int): Pair<Int, Double> {

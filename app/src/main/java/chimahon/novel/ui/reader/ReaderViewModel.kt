@@ -1383,10 +1383,10 @@ class ReaderViewModel(
                 lastModified = bookmarkLastModified,
             )
             if (force) {
-                BookStorage.save(snapshot, rootUrl, FileNames.bookmark)
+                BookStorage.save(snapshot, rootUrl, FileNames.BOOKMARK)
             } else {
                 scope.launch(kotlinx.coroutines.Dispatchers.IO) {
-                    runCatching { BookStorage.save(snapshot, rootUrl, FileNames.bookmark) }
+                    runCatching { BookStorage.save(snapshot, rootUrl, FileNames.BOOKMARK) }
                 }
             }
         }

@@ -1,11 +1,11 @@
 package tachiyomi.data.novel
 
-import tachiyomi.data.DatabaseHandler
+import logcat.LogPriority
 import tachiyomi.core.common.util.system.logcat
+import tachiyomi.data.DatabaseHandler
 import tachiyomi.domain.novel.model.NovelHistory
 import tachiyomi.domain.novel.model.NovelHistoryWithRelations
 import tachiyomi.domain.novel.repository.NovelHistoryRepository
-import logcat.LogPriority
 
 fun mapNovelHistory(
     id: Long,

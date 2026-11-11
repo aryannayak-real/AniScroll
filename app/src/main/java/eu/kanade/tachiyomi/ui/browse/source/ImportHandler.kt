@@ -3,11 +3,10 @@ package eu.kanade.tachiyomi.ui.browse.source
 import android.content.Context
 import android.net.Uri
 import android.provider.OpenableColumns
+import chimahon.novel.data.BookImporter
 import chimahon.novel.interactor.RegisterLocalNovelHome
 import chimahon.novel.source.LocalNovelFiles
-import chimahon.novel.data.BookImporter
 import com.hippo.unifile.UniFile
-import tachiyomi.source.local.LocalSource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import tachiyomi.domain.category.repository.CategoryRepository
@@ -17,6 +16,7 @@ import tachiyomi.domain.manga.model.Manga
 import tachiyomi.domain.manga.model.MangaUpdate
 import tachiyomi.domain.manga.repository.MangaRepository
 import tachiyomi.domain.storage.service.StorageManager
+import tachiyomi.source.local.LocalSource
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -26,11 +26,11 @@ object ImportHandler {
         val mangaRepository: MangaRepository = Injekt.get()
         val storageManager: StorageManager = Injekt.get()
         val libraryPreferences: LibraryPreferences = Injekt.get()
-        
+
         val localSourceDir = storageManager.getLocalSourceDirectory() ?: return@withContext
         val safeFolderName = MangaImportUtil.getSafeFolderName(folderName)
         val mangaDir = localSourceDir.createDirectory(safeFolderName) ?: return@withContext
-        
+
         uris.forEach { uri ->
             val fileName = getFileName(context, uri) ?: return@forEach
             val file = mangaDir.createFile(fileName) ?: return@forEach
@@ -40,7 +40,7 @@ object ImportHandler {
                 }
             }
         }
-        
+
         addMangaToLibrary(safeFolderName, mangaRepository, libraryPreferences)
     }
 
@@ -48,14 +48,14 @@ object ImportHandler {
         val mangaRepository: MangaRepository = Injekt.get()
         val storageManager: StorageManager = Injekt.get()
         val libraryPreferences: LibraryPreferences = Injekt.get()
-        
+
         val localSourceDir = storageManager.getLocalSourceDirectory() ?: return@withContext
         val safeFolderName = MangaImportUtil.getSafeFolderName(folderName)
         val mangaDir = localSourceDir.createDirectory(safeFolderName) ?: return@withContext
-        
+
         val sourceDir = UniFile.fromUri(context, uri) ?: return@withContext
         val destChapterDir = mangaDir.createDirectory(sourceDir.name ?: "Imported Folder") ?: return@withContext
-        
+
         sourceDir.listFiles()?.forEach { file ->
             if (!file.isDirectory) {
                 val destFile = destChapterDir.createFile(file.name) ?: return@forEach
@@ -66,14 +66,14 @@ object ImportHandler {
                 }
             }
         }
-        
+
         addMangaToLibrary(safeFolderName, mangaRepository, libraryPreferences)
     }
 
     private suspend fun addMangaToLibrary(
         safeFolderName: String,
         mangaRepository: MangaRepository,
-        libraryPreferences: LibraryPreferences
+        libraryPreferences: LibraryPreferences,
     ) {
         val existingManga = mangaRepository.getMangaByUrlAndSourceId(safeFolderName, LocalSource.ID)
         val manga = if (existingManga == null) {
@@ -92,7 +92,7 @@ object ImportHandler {
             }
             existingManga
         }
-        
+
         if (existingManga == null) {
             val defaultCategoryId = libraryPreferences.defaultCategory().get()
             if (defaultCategoryId != -1) {

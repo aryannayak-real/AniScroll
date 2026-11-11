@@ -11,9 +11,10 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.core.graphics.ColorUtils
 import androidx.core.view.WindowCompat
 import chimahon.novel.data.BookMetadata
 import chimahon.novel.data.BookStorage
@@ -22,12 +23,11 @@ import chimahon.novel.sync.ttu.ReaderLifecycleAutoSyncEvent
 import chimahon.novel.sync.ttu.readerLifecycleAutoSyncPlan
 import chimahon.ocr.OcrLanguage
 import chimahon.ocr.OcrResult
-import androidx.core.graphics.ColorUtils
-import uy.kohesive.injekt.Injekt
-import uy.kohesive.injekt.api.get
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import tachiyomi.domain.novel.repository.NovelRepository
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 import java.io.File
 
 open class NovelReaderActivity : ComponentActivity() {
@@ -74,7 +74,8 @@ open class NovelReaderActivity : ComponentActivity() {
             android.view.KeyEvent.KEYCODE_DPAD_LEFT, android.view.KeyEvent.KEYCODE_DPAD_RIGHT,
             android.view.KeyEvent.KEYCODE_DPAD_UP, android.view.KeyEvent.KEYCODE_DPAD_DOWN,
             android.view.KeyEvent.KEYCODE_PAGE_UP, android.view.KeyEvent.KEYCODE_PAGE_DOWN,
-            android.view.KeyEvent.KEYCODE_MENU -> return true
+            android.view.KeyEvent.KEYCODE_MENU,
+            -> return true
         }
         return super.onKeyDown(keyCode, event)
     }

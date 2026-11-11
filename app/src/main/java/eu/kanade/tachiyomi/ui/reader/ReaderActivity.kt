@@ -37,8 +37,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -66,7 +66,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalConfiguration
-import chimahon.MediaInfo
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
@@ -77,15 +76,17 @@ import androidx.core.content.getSystemService
 import androidx.core.graphics.Insets
 import androidx.core.net.toUri
 import androidx.core.transition.doOnEnd
-import androidx.core.view.isVisible
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
+import chimahon.MediaInfo
+import chimahon.ocr.CropPresets
+import chimahon.ocr.OcrBitmapDecoder
+import chimahon.util.ImageEncoder
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
 import com.google.android.material.transition.platform.MaterialContainerTransform
 import com.hippo.unifile.UniFile
@@ -96,8 +97,8 @@ import eu.kanade.domain.manga.model.readingMode
 import eu.kanade.domain.ui.UiPreferences
 import eu.kanade.presentation.reader.ChapterListDialog
 import eu.kanade.presentation.reader.DisplayRefreshHost
-import eu.kanade.presentation.reader.OrientationSelectDialog
 import eu.kanade.presentation.reader.OcrRegionSelector
+import eu.kanade.presentation.reader.OrientationSelectDialog
 import eu.kanade.presentation.reader.ReaderContentOverlay
 import eu.kanade.presentation.reader.ReaderPageActionsDialog
 import eu.kanade.presentation.reader.ReaderPageIndicator
@@ -105,6 +106,7 @@ import eu.kanade.presentation.reader.ReadingModeSelectDialog
 import eu.kanade.presentation.reader.appbars.NavBarType
 import eu.kanade.presentation.reader.appbars.ReaderAppBars
 import eu.kanade.presentation.reader.settings.ReaderSettingsDialog
+import eu.kanade.presentation.reader.stats.MangaStatsSheet
 import eu.kanade.presentation.theme.TachiyomiTheme
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.coil.TachiyomiImageDecoder
@@ -127,29 +129,20 @@ import eu.kanade.tachiyomi.ui.reader.loader.HttpPageLoader
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
-import eu.kanade.tachiyomi.ui.reader.viewer.ReaderPageImageView
-import chimahon.ocr.CropPresets
-import chimahon.ocr.OcrBitmapDecoder
-import chimahon.util.ImageEncoder
-import uy.kohesive.injekt.Injekt
-import uy.kohesive.injekt.api.get
-import tachiyomi.core.common.util.lang.withUIContext
-import logcat.logcat
-import logcat.LogPriority
-import eu.kanade.presentation.reader.stats.MangaStatsSheet
 import eu.kanade.tachiyomi.ui.reader.setting.ReaderOcrSource
 import eu.kanade.tachiyomi.ui.reader.setting.ReaderOrientation
 import eu.kanade.tachiyomi.ui.reader.setting.ReaderPreferences
 import eu.kanade.tachiyomi.ui.reader.setting.ReaderSettingsScreenModel
 import eu.kanade.tachiyomi.ui.reader.setting.ReadingMode
 import eu.kanade.tachiyomi.ui.reader.viewer.OcrLookupPopup
+import eu.kanade.tachiyomi.ui.reader.viewer.ReaderPageImageView
 import eu.kanade.tachiyomi.ui.reader.viewer.ReaderProgressIndicator
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerConfig
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerPageHolder
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.VerticalPagerViewer
-import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonPageHolder
+import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonViewer
 import eu.kanade.tachiyomi.ui.webview.WebViewActivity
 import eu.kanade.tachiyomi.util.system.isNightMode
 import eu.kanade.tachiyomi.util.system.openInBrowser
@@ -162,9 +155,11 @@ import exh.util.mangaType
 import kotlinx.collections.immutable.persistentSetOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableSet
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
@@ -176,6 +171,8 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.sample
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import logcat.LogPriority
+import logcat.logcat
 import tachiyomi.core.common.Constants
 import tachiyomi.core.common.i18n.pluralStringResource
 import tachiyomi.core.common.i18n.stringResource
@@ -852,7 +849,11 @@ class ReaderActivity : BaseActivity() {
                         val (activeProfile, deferredLookup) = preDeferLookup(lookupString)
 
                         lifecycleScope.launch(Dispatchers.Default) {
-                            val result = try { deferredLookup.await() } catch (_: Exception) { null }
+                            val result = try {
+                                deferredLookup.await()
+                            } catch (_: Exception) {
+                                null
+                            }
                             val firstMatched = result?.results?.firstOrNull()?.matched
                             val charCount = firstMatched?.codePointCount(0, firstMatched.length)
 
@@ -867,17 +868,19 @@ class ReaderActivity : BaseActivity() {
                                 null as android.graphics.RectF?
                             }
 
-                                withContext(Dispatchers.Main) {
+                            withContext(Dispatchers.Main) {
                                 val state = viewModel.state.value
                                 val mediaInfo = if (state.manga != null && state.currentChapter != null) {
                                     chimahon.MediaInfo(mangaTitle = state.manga!!.title, chapterName = state.currentChapter!!.chapter.name)
-                                } else null
+                                } else {
+                                    null
+                                }
                                 ensureOcrResources()
                                 ocrPopupState = OcrPopupState(
                                     lookupString, fullText, charOffset, ocrWebView!!, dictionaryRepository,
                                     rect?.left ?: anchorX, rect?.top ?: anchorY,
                                     rect?.width() ?: anchorWidth, rect?.height() ?: anchorHeight,
-                                    isVertical, getOrRefreshLookupPaths().first, mediaInfo, sourcePage, null
+                                    isVertical, getOrRefreshLookupPaths().first, mediaInfo, sourcePage, null,
                                 )
                                 ocrSelectionPanelState = null
                                 ocrPopupVisible = true
@@ -911,7 +914,11 @@ class ReaderActivity : BaseActivity() {
                         val (activeProfile, deferredLookup) = preDeferLookup(lookupString)
 
                         lifecycleScope.launch(Dispatchers.Default) {
-                            val result = try { deferredLookup.await() } catch (_: Exception) { null }
+                            val result = try {
+                                deferredLookup.await()
+                            } catch (_: Exception) {
+                                null
+                            }
                             val firstMatched = result?.results?.firstOrNull()?.matched
                             val charCount = firstMatched?.codePointCount(0, firstMatched.length)
 
@@ -926,17 +933,19 @@ class ReaderActivity : BaseActivity() {
                                 null as android.graphics.RectF?
                             }
 
-                                withContext(Dispatchers.Main) {
+                            withContext(Dispatchers.Main) {
                                 val state = viewModel.state.value
                                 val mediaInfo = if (state.manga != null && state.currentChapter != null) {
                                     chimahon.MediaInfo(mangaTitle = state.manga!!.title, chapterName = state.currentChapter!!.chapter.name)
-                                } else null
+                                } else {
+                                    null
+                                }
                                 ensureOcrResources()
                                 ocrPopupState = OcrPopupState(
                                     lookupString, fullText, charOffset, ocrWebView!!, dictionaryRepository,
                                     rect?.left ?: anchorX, rect?.top ?: anchorY,
                                     rect?.width() ?: anchorWidth, rect?.height() ?: anchorHeight,
-                                    isVertical, getOrRefreshLookupPaths().first, mediaInfo, sourcePage, null
+                                    isVertical, getOrRefreshLookupPaths().first, mediaInfo, sourcePage, null,
                                 )
                                 ocrSelectionPanelState = null
                                 ocrPopupVisible = true

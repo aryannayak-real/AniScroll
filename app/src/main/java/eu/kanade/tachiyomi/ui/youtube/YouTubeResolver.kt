@@ -64,8 +64,7 @@ class YouTubeResolver {
         }
 
         // Returns streams + video metadata
-        suspend fun resolveVideo(videoId: String, preferredQuality: String = YouTubePreferences.DEFAULT_QUALITY):
-            YouTubeVideoMetadata = resolveMutex.withLock {
+        suspend fun resolveVideo(videoId: String, preferredQuality: String = YouTubePreferences.DEFAULT_QUALITY): YouTubeVideoMetadata = resolveMutex.withLock {
             withContext(Dispatchers.IO) {
                 ensureInitialized()
                 val linkHandler = ServiceList.YouTube.getStreamLHFactory().fromId(videoId)
@@ -140,7 +139,6 @@ class YouTubeResolver {
                         initialized = true,
                     ).apply { videoPageUrl = extractor.url }
                         .withoutExternalSubtitleLookup()
-
                 }
 
                 val videos = streamVideos.distinctBy { it.videoTitle to it.videoUrl }.toMutableList()
@@ -191,11 +189,13 @@ class YouTubeResolver {
                     }.getOrDefault(""),
                     videoType = when (streamType) {
                         StreamType.LIVE_STREAM,
-                        StreamType.POST_LIVE_STREAM -> "Livestream"
+                        StreamType.POST_LIVE_STREAM,
+                        -> "Livestream"
                         StreamType.VIDEO_STREAM -> "Video"
                         StreamType.AUDIO_STREAM -> "Audio"
                         StreamType.AUDIO_LIVE_STREAM,
-                        StreamType.POST_LIVE_AUDIO_STREAM -> "Audio livestream"
+                        StreamType.POST_LIVE_AUDIO_STREAM,
+                        -> "Audio livestream"
                         StreamType.NONE -> null
                         else -> null
                     },
@@ -210,27 +210,27 @@ class YouTubeResolver {
         }
 
         suspend fun resolveChannel(channelId: String): YouTubeChannelMetadata = resolveMutex.withLock {
-                withContext(Dispatchers.IO) {
-                    ensureInitialized()
-                    val linkHandler = ServiceList.YouTube.channelLHFactory.fromId(channelId)
-                    val extractor = ServiceList.YouTube.getChannelExtractor(linkHandler)
-                    extractor.fetchPage()
+            withContext(Dispatchers.IO) {
+                ensureInitialized()
+                val linkHandler = ServiceList.YouTube.channelLHFactory.fromId(channelId)
+                val extractor = ServiceList.YouTube.getChannelExtractor(linkHandler)
+                extractor.fetchPage()
 
-                    YouTubeChannelMetadata(
-                        id = extractor.id,
-                        name = extractor.name,
-                        url = YouTubeSource.CHANNEL_PREFIX + extractor.id,
+                YouTubeChannelMetadata(
+                    id = extractor.id,
+                    name = extractor.name,
+                    url = YouTubeSource.CHANNEL_PREFIX + extractor.id,
 
-                        description = extractor.description,
-                        avatarUrl = runCatching {
-                                extractor.avatars.maxByOrNull { it.width }?.url!!
-                            }.getOrDefault(""),
-                        bannerUrl = runCatching {
-                                extractor.banners.maxByOrNull { it.width }?.url!!
-                            }.getOrDefault(""),
-                    )
-                }
+                    description = extractor.description,
+                    avatarUrl = runCatching {
+                        extractor.avatars.maxByOrNull { it.width }?.url!!
+                    }.getOrDefault(""),
+                    bannerUrl = runCatching {
+                        extractor.banners.maxByOrNull { it.width }?.url!!
+                    }.getOrDefault(""),
+                )
             }
+        }
 
         suspend fun resolveVideosFromTab(channelId: String, tab: String /* videos, shorts, livestreams */): List<YouTubeVideoItem> = resolveMutex.withLock {
             withContext(Dispatchers.IO) {
@@ -263,8 +263,8 @@ class YouTubeResolver {
                                 else -> null
                             },
                             thumbnailUrl = runCatching {
-                                    item.thumbnails?.maxByOrNull { it.width }!!.url
-                                }.getOrDefault(""),
+                                item.thumbnails?.maxByOrNull { it.width }!!.url
+                            }.getOrDefault(""),
                             viewCount = item.viewCount,
                             shortDescription = item.shortDescription,
                         )
@@ -272,8 +272,7 @@ class YouTubeResolver {
             }
         }
 
-        fun getVideoId(videoUrl: String): String
-        {
+        fun getVideoId(videoUrl: String): String {
             val videoId = extractVideoId(videoUrl)
                 ?: throw IllegalArgumentException("Could not find YouTube video id")
 

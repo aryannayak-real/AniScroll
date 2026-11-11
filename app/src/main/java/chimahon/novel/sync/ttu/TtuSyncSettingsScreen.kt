@@ -475,8 +475,11 @@ fun TtuSyncSettingsScreen() {
                 Text(
                     text = text,
                     modifier = Modifier.padding(horizontal = 16.dp),
-                    color = if (authStatus is DriveAuthStatus.Failed) MaterialTheme.colorScheme.error
-                    else MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = if (authStatus is DriveAuthStatus.Failed) {
+                        MaterialTheme.colorScheme.error
+                    } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    },
                     style = MaterialTheme.typography.bodyMedium,
                 )
             }
@@ -585,23 +588,23 @@ private fun DeviceCodeSetup() {
             color = MaterialTheme.colorScheme.onSurface,
         )
         Text(
-            text = GoogleCloudOAuthConfiguration.introduction,
+            text = GoogleCloudOAuthConfiguration.INTRODUCTION,
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Text(
-            text = GoogleCloudOAuthConfiguration.ttuSetupLinkLabel,
+            text = GoogleCloudOAuthConfiguration.TTU_SETUP_LINK_LABEL,
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.primary,
             textDecoration = TextDecoration.Underline,
             modifier = Modifier.clickable {
                 context.startActivity(
-                    Intent(Intent.ACTION_VIEW, Uri.parse(GoogleCloudOAuthConfiguration.ttuSetupUrl)),
+                    Intent(Intent.ACTION_VIEW, Uri.parse(GoogleCloudOAuthConfiguration.TTU_SETUP_URL)),
                 )
             },
         )
         GoogleCloudOAuthConfiguration.instructions.forEachIndexed { index, instruction ->
-            val links = GoogleCloudOAuthConfiguration.instructionLinks
+            val links = GoogleCloudOAuthConfiguration.INSTRUCTION_LINKS
             val linkColor = MaterialTheme.colorScheme.primary
             val annotated = buildAnnotatedString {
                 append("${index + 1}. ")

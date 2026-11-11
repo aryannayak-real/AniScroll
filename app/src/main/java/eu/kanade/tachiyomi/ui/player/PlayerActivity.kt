@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-/**
+/*
  * Code is a mix between PlayerActivity from mpvKt and the former
  * PlayerActivity from Aniyomi.
  */
@@ -34,8 +34,6 @@ import android.content.pm.PackageManager
 import android.content.res.AssetManager
 import android.content.res.Configuration
 import android.graphics.Rect
-import android.view.MotionEvent
-import android.view.ViewConfiguration
 import android.media.AudioManager
 import android.media.session.MediaSession
 import android.media.session.PlaybackState
@@ -46,7 +44,9 @@ import android.os.Environment
 import android.os.Looper
 import android.util.Rational
 import android.view.KeyEvent
+import android.view.MotionEvent
 import android.view.View
+import android.view.ViewConfiguration
 import android.view.WindowManager
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
@@ -109,8 +109,8 @@ import tachiyomi.core.common.util.lang.launchIO
 import tachiyomi.core.common.util.lang.launchNonCancellable
 import tachiyomi.core.common.util.lang.launchUI
 import tachiyomi.core.common.util.lang.withUIContext
-import tachiyomi.core.common.util.system.logcat
 import tachiyomi.core.common.util.system.UrlUtils
+import tachiyomi.core.common.util.system.logcat
 import tachiyomi.domain.custombuttons.model.CustomButton
 import tachiyomi.domain.storage.service.StorageManager
 import tachiyomi.i18n.MR
@@ -243,8 +243,7 @@ class PlayerActivity : BaseActivity() {
         fun newYoutubeIntent(
             context: Context,
             videoUrl: String,
-        ): Intent
-        {
+        ): Intent {
             return Intent(context, PlayerActivity::class.java).apply {
                 putExtra(EXTRA_YOUTUBE_VIDEO, true)
                 putExtra(EXTRA_YOUTUBE_VIDEO_URL, videoUrl)
@@ -253,24 +252,19 @@ class PlayerActivity : BaseActivity() {
         }
     }
 
-
     @SuppressLint("MissingSuperCall")
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
 
-        if (intent.isYoutubeVideoIntent())
-        {
+        if (intent.isYoutubeVideoIntent()) {
             player.isExiting = false
             val videoUrl = intent.getStringExtra(EXTRA_YOUTUBE_VIDEO_URL)
-            if (videoUrl != null)
-            {
+            if (videoUrl != null) {
                 // Create anime and episodes
                 viewModel.loadYoutubeVideo(videoUrl)
                 setIntent(intent)
                 return
-            }
-            else
-            {
+            } else {
                 toast("Failed to get youtube url")
                 logcat(LogPriority.ERROR) { "Failed to get youtube url" }
                 finish()
@@ -368,7 +362,7 @@ class PlayerActivity : BaseActivity() {
         return Video(
             videoUrl = uriString,
             videoTitle = title,
-            initialized = true
+            initialized = true,
         )
     }
 
@@ -585,8 +579,6 @@ class PlayerActivity : BaseActivity() {
         updateDiscordRPC(exitingPlayer = true)
         // <-- KMK
 
-
-
         if (isInPictureInPictureMode) {
             super.onPause()
             return
@@ -675,7 +667,6 @@ class PlayerActivity : BaseActivity() {
                 if (it != -1f) viewModel.changeBrightnessTo(it)
             }
         }
-
 
         castManager.apply {
             registerSessionListener()
@@ -971,8 +962,6 @@ class PlayerActivity : BaseActivity() {
         updateDiscordRPC(exitingPlayer = false)
         // <-- KMK
 
-
-
         if (!player.isExiting) {
             super.onResume()
             return
@@ -1054,7 +1043,6 @@ class PlayerActivity : BaseActivity() {
                 runCatching {
                     updatePictureInPictureParamsIfAvailable()
                 }
-
             }
 
             "paused-for-cache" -> {
@@ -1544,7 +1532,6 @@ class PlayerActivity : BaseActivity() {
                 loadFile(playableUrl, videoToLoad.mpvArgs)
             }
         }
-
     }
 
     /**
@@ -1921,5 +1908,4 @@ class PlayerActivity : BaseActivity() {
             viewModel.changeEpisode(previous = false, autoPlay = true)
         }
     }
-
 }

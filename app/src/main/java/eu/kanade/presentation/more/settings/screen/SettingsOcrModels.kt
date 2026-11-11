@@ -67,10 +67,12 @@ internal fun getOcrModelsGroup(): Preference.PreferenceGroup {
     }
 
     val importLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
-        if (uri != null) scope.launch {
-            val result = ocr.importFromUri(uri)
-            context.toast(if (result.isSuccess) "OCR models imported" else "Import failed: ${result.exceptionOrNull()?.message}")
-            refreshing++
+        if (uri != null) {
+            scope.launch {
+                val result = ocr.importFromUri(uri)
+                context.toast(if (result.isSuccess) "OCR models imported" else "Import failed: ${result.exceptionOrNull()?.message}")
+                refreshing++
+            }
         }
     }
 
@@ -138,10 +140,12 @@ internal fun getOcrModelsGroup(): Preference.PreferenceGroup {
     }
     return Preference.PreferenceGroup(
         title = stringResource(MR.strings.pref_downloaded_models),
-        preferenceItems = (rows + Preference.PreferenceItem.TextPreference(
-            title = "Import OCR models",
-            subtitle = "Import models.zip for Local OCR from device storage",
-            onClick = { importLauncher.launch(arrayOf("application/zip")) },
-        )).toPersistentList(),
+        preferenceItems = (
+            rows + Preference.PreferenceItem.TextPreference(
+                title = "Import OCR models",
+                subtitle = "Import models.zip for Local OCR from device storage",
+                onClick = { importLauncher.launch(arrayOf("application/zip")) },
+            )
+            ).toPersistentList(),
     )
 }

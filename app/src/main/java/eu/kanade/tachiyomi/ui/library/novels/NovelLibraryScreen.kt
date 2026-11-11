@@ -33,8 +33,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Label
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.outlined.Delete
-import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Download
+import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.RestartAlt
 import androidx.compose.material.icons.outlined.Sync
 import androidx.compose.material.icons.outlined.Upload
@@ -80,6 +80,7 @@ import chimahon.novel.sync.ttu.SyncMode
 import chimahon.novel.sync.ttu.SyncResult
 import chimahon.novel.sync.ttu.TtuBookRef
 import chimahon.novel.sync.ttu.TtuSyncManager
+import chimahon.novel.ui.detail.NovelDetailScreen
 import eu.kanade.presentation.components.TabbedDialog
 import eu.kanade.presentation.components.TabbedDialogPaddings
 import eu.kanade.presentation.library.components.CommonMangaItemDefaults
@@ -89,19 +90,17 @@ import eu.kanade.presentation.library.components.LibraryToolbar
 import eu.kanade.presentation.library.components.LibraryToolbarTitle
 import eu.kanade.presentation.library.components.libraryModeBoundarySwipe
 import eu.kanade.presentation.library.components.libraryPagerBoundarySwipe
-import eu.kanade.presentation.manga.components.Button as BottomMenuButton
 import eu.kanade.tachiyomi.data.library.NovelUpdateJob
 import eu.kanade.tachiyomi.ui.category.CategoryScreen
 import eu.kanade.tachiyomi.ui.home.HomeScreen
 import eu.kanade.tachiyomi.ui.library.LibraryModeTitleContent
-import chimahon.novel.ui.detail.NovelDetailScreen
 import eu.kanade.tachiyomi.ui.library.LibraryViewMode
 import eu.kanade.tachiyomi.util.system.toast
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
@@ -128,9 +127,10 @@ import tachiyomi.presentation.core.screens.EmptyScreen
 import tachiyomi.presentation.core.screens.LoadingScreen
 import tachiyomi.presentation.core.util.collectAsState
 import tachiyomi.presentation.core.util.plus
-import kotlin.time.Duration.Companion.seconds
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import kotlin.time.Duration.Companion.seconds
+import eu.kanade.presentation.manga.components.Button as BottomMenuButton
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -270,14 +270,14 @@ fun Screen.NovelLibraryScreen(
                 onClickSelectAll = screenModel::selectAll,
                 onClickInvertSelection = screenModel::invertSelection,
                 onClickFilter = screenModel::showSortDialog,
-                    onClickRefresh = {
-                        if (!NovelUpdateJob.isRunning(context)) {
-                            NovelUpdateJob.startNow(context)
-                        } else {
-                            context.toast(MR.strings.update_already_running)
-                        }
-                    },
-                    onClickSyncNow = null,
+                onClickRefresh = {
+                    if (!NovelUpdateJob.isRunning(context)) {
+                        NovelUpdateJob.startNow(context)
+                    } else {
+                        context.toast(MR.strings.update_already_running)
+                    }
+                },
+                onClickSyncNow = null,
                 onClickGlobalUpdate = null,
                 onClickOpenRandomManga = {
                     val randomBook = screenModel.getRandomBookForCurrentCategory()
@@ -545,7 +545,7 @@ fun Screen.NovelLibraryScreen(
 
             val enabledLanguages = remember {
                 listOf(
-                    "ja", "ko", "ar", "zh", "en", "de", "fr", "ru", "es", "it"
+                    "ja", "ko", "ar", "zh", "en", "de", "fr", "ru", "es", "it",
                 ).sortedWith { a, b ->
                     eu.kanade.tachiyomi.util.system.LocaleHelper.getDisplayName(a)
                         .compareTo(eu.kanade.tachiyomi.util.system.LocaleHelper.getDisplayName(b))
@@ -556,7 +556,7 @@ fun Screen.NovelLibraryScreen(
                 dictPrefs.profileResolver.resolve(
                     sourceId = 0L,
                     sourceLang = editLang,
-                    novelId = ""
+                    novelId = "",
                 )
             }
             val autoLabel = "Auto (${resolvedAutoProfile.name})"
@@ -567,27 +567,27 @@ fun Screen.NovelLibraryScreen(
                 text = {
                     Column(
                         modifier = Modifier.fillMaxWidth(),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         androidx.compose.material3.TextField(
                             value = editTitle,
                             onValueChange = { editTitle = it },
                             label = { Text("Title") },
                             singleLine = true,
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier.fillMaxWidth(),
                         )
                         androidx.compose.material3.TextField(
                             value = editAuthor,
                             onValueChange = { editAuthor = it },
                             label = { Text("Author") },
                             singleLine = true,
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier.fillMaxWidth(),
                         )
 
                         var langExpanded by remember { mutableStateOf(false) }
                         ExposedDropdownMenuBox(
                             expanded = langExpanded,
-                            onExpandedChange = { langExpanded = it }
+                            onExpandedChange = { langExpanded = it },
                         ) {
                             val langDisplayName = if (editLang.isEmpty()) "None" else eu.kanade.tachiyomi.util.system.LocaleHelper.getDisplayName(editLang)
                             androidx.compose.material3.TextField(
@@ -596,18 +596,18 @@ fun Screen.NovelLibraryScreen(
                                 readOnly = true,
                                 label = { Text("Language") },
                                 trailingIcon = { androidx.compose.material3.ExposedDropdownMenuDefaults.TrailingIcon(expanded = langExpanded) },
-                                modifier = Modifier.menuAnchor(androidx.compose.material3.MenuAnchorType.PrimaryNotEditable).fillMaxWidth()
+                                modifier = Modifier.menuAnchor(androidx.compose.material3.MenuAnchorType.PrimaryNotEditable).fillMaxWidth(),
                             )
                             ExposedDropdownMenu(
                                 expanded = langExpanded,
-                                onDismissRequest = { langExpanded = false }
+                                onDismissRequest = { langExpanded = false },
                             ) {
                                 DropdownMenuItem(
                                     text = { Text("None") },
                                     onClick = {
                                         editLang = ""
                                         langExpanded = false
-                                    }
+                                    },
                                 )
                                 enabledLanguages.forEach { lang ->
                                     DropdownMenuItem(
@@ -615,7 +615,7 @@ fun Screen.NovelLibraryScreen(
                                         onClick = {
                                             editLang = lang
                                             langExpanded = false
-                                        }
+                                        },
                                     )
                                 }
                             }
@@ -630,7 +630,7 @@ fun Screen.NovelLibraryScreen(
 
                         ExposedDropdownMenuBox(
                             expanded = profileExpanded,
-                            onExpandedChange = { profileExpanded = it }
+                            onExpandedChange = { profileExpanded = it },
                         ) {
                             androidx.compose.material3.TextField(
                                 value = selectedName,
@@ -638,18 +638,18 @@ fun Screen.NovelLibraryScreen(
                                 readOnly = true,
                                 label = { Text("Anki Profile Override") },
                                 trailingIcon = { androidx.compose.material3.ExposedDropdownMenuDefaults.TrailingIcon(expanded = profileExpanded) },
-                                modifier = Modifier.menuAnchor(androidx.compose.material3.MenuAnchorType.PrimaryNotEditable).fillMaxWidth()
+                                modifier = Modifier.menuAnchor(androidx.compose.material3.MenuAnchorType.PrimaryNotEditable).fillMaxWidth(),
                             )
                             ExposedDropdownMenu(
                                 expanded = profileExpanded,
-                                onDismissRequest = { profileExpanded = false }
+                                onDismissRequest = { profileExpanded = false },
                             ) {
                                 DropdownMenuItem(
                                     text = { Text(autoLabel) },
                                     onClick = {
                                         selectedOverride = ""
                                         profileExpanded = false
-                                    }
+                                    },
                                 )
                                 profiles.forEach { p ->
                                     DropdownMenuItem(
@@ -657,7 +657,7 @@ fun Screen.NovelLibraryScreen(
                                         onClick = {
                                             selectedOverride = p.id
                                             profileExpanded = false
-                                        }
+                                        },
                                     )
                                 }
                             }
@@ -670,10 +670,10 @@ fun Screen.NovelLibraryScreen(
                             val updatedBook = book.copy(
                                 title = editTitle.ifBlank { null },
                                 author = editAuthor.ifBlank { null },
-                                lang = editLang.ifBlank { null }
+                                lang = editLang.ifBlank { null },
                             )
                             screenModel.updateBookMetadata(updatedBook, selectedOverride)
-                        }
+                        },
                     ) {
                         Text(stringResource(MR.strings.action_save))
                     }
@@ -682,7 +682,7 @@ fun Screen.NovelLibraryScreen(
                     TextButton(onClick = onDismissRequest) {
                         Text(stringResource(MR.strings.action_cancel))
                     }
-                }
+                },
             )
         }
 
@@ -1102,7 +1102,9 @@ private fun NovelLibraryGrid(
                     onClick = onClick,
                     onClickContinueReading = if (book is NovelLibraryItem.SourceNovel && book.unreadCount > 0) {
                         { onClickBook(book) }
-                    } else null,
+                    } else {
+                        null
+                    },
                     usePanoramaCover = false,
                 )
             } else {
@@ -1143,7 +1145,9 @@ private fun NovelLibraryGrid(
                     onClick = onClick,
                     onClickContinueReading = if (book is NovelLibraryItem.SourceNovel && book.unreadCount > 0) {
                         { onClickBook(book) }
-                    } else null,
+                    } else {
+                        null
+                    },
                 )
             }
         }

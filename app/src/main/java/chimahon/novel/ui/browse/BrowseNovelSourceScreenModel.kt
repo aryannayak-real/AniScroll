@@ -73,7 +73,11 @@ class BrowseNovelSourceScreenModel(
 
     private fun loadFilters() {
         val src = source as? eu.kanade.tachiyomi.sourcenovel.NovelsPageSource ?: return
-        currentFilters = try { src.getFilterList() } catch (_: Exception) { eu.kanade.tachiyomi.source.model.FilterList() }
+        currentFilters = try {
+            src.getFilterList()
+        } catch (_: Exception) {
+            eu.kanade.tachiyomi.source.model.FilterList()
+        }
     }
 
     fun setFilters(newFilters: eu.kanade.tachiyomi.source.model.FilterList) {

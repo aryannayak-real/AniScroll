@@ -12,8 +12,8 @@ import eu.kanade.tachiyomi.sourcenovel.model.ChapterContent
 import eu.kanade.tachiyomi.sourcenovel.model.NovelPage
 import eu.kanade.tachiyomi.sourcenovel.model.SNChapter
 import eu.kanade.tachiyomi.sourcenovel.model.SNNovel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.Credentials
 import okhttp3.HttpUrl.Companion.toHttpUrl
@@ -66,7 +66,9 @@ class OpdsSource(
         val template = if (feed.searchDescription || !advertised.contains('{')) {
             val (text, responseUrl) = fetchText(catalog, advertised)
             OpdsParser.searchTemplate(text, responseUrl)
-        } else advertised
+        } else {
+            advertised
+        }
         return OpdsParser.expandSearch(template, query)
     }
 

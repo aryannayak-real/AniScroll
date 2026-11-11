@@ -51,10 +51,13 @@ class AnkiSentenceAudioCommitterTest {
     @Test
     fun `no sentence audio marker does not invoke provider`() = runTest {
         var invoked = false
-        val preparation = prepareSentenceAudioForMarker(false, LazyAnkiSentenceAudioProvider {
-            invoked = true
-            error("must not be invoked")
-        })
+        val preparation = prepareSentenceAudioForMarker(
+            false,
+            LazyAnkiSentenceAudioProvider {
+                invoked = true
+                error("must not be invoked")
+            },
+        )
 
         assertNull(preparation)
         assertFalse(invoked)
@@ -62,9 +65,12 @@ class AnkiSentenceAudioCommitterTest {
 
     @Test
     fun `provider exception becomes unavailable unknown`() = runTest {
-        val preparation = prepareSentenceAudioForMarker(true, LazyAnkiSentenceAudioProvider {
-            error("native failure")
-        })
+        val preparation = prepareSentenceAudioForMarker(
+            true,
+            LazyAnkiSentenceAudioProvider {
+                error("native failure")
+            },
+        )
 
         assertEquals(
             AnkiSentenceAudioPreparation.Unavailable(AnkiSentenceAudioFailure.UNKNOWN),
@@ -76,9 +82,12 @@ class AnkiSentenceAudioCommitterTest {
     fun `provider cancellation propagates`() = runTest {
         assertThrows(CancellationException::class.java) {
             kotlinx.coroutines.runBlocking {
-                prepareSentenceAudioForMarker(true, LazyAnkiSentenceAudioProvider {
-                    throw CancellationException("cancel")
-                })
+                prepareSentenceAudioForMarker(
+                    true,
+                    LazyAnkiSentenceAudioProvider {
+                        throw CancellationException("cancel")
+                    },
+                )
             }
         }
     }

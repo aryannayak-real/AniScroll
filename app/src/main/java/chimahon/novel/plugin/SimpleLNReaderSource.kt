@@ -31,8 +31,8 @@ import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
-import okhttp3.Request
 import logcat.LogPriority
+import okhttp3.Request
 import tachiyomi.core.common.util.system.logcat
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -68,7 +68,10 @@ class SimpleLNReaderSource(
         return base + "/" + path.trimStart('/')
     }
 
-    private val json = Json { ignoreUnknownKeys = true; isLenient = true }
+    private val json = Json {
+        ignoreUnknownKeys = true
+        isLenient = true
+    }
     // Serializes JS executions of this source (see withPlugin).
     private val jsMutex = Mutex()
     // Novel: single shared executor per process to avoid thread leak (one per source → 50 threads)
@@ -76,7 +79,9 @@ class SimpleLNReaderSource(
     // Novel: bridgeCache for filters/settings so getFilterList never init QuickJS on main thread
     private val bridgeCache = context.getSharedPreferences("novel_plugin_bridge_cache", Context.MODE_PRIVATE)
     private val bridgeCacheKey = "$pluginId:${codeUrl.hashCode()}"
+
     @Volatile private var filtersJsonCache: String? = bridgeCache.getString("$bridgeCacheKey:filters", null)
+
     @Volatile private var pluginSettingsJsonCache: String? = bridgeCache.getString("$bridgeCacheKey:settings", null)
 
     companion object {
@@ -96,7 +101,11 @@ class SimpleLNReaderSource(
         }
         val localFile = java.io.File(java.io.File(context.filesDir, "novel-plugins"), "$pluginId.js")
         if (localFile.exists() && localFile.length() > 0) {
-            val code = try { localFile.readText() } catch (_: Exception) { "" }
+            val code = try {
+                localFile.readText()
+            } catch (_: Exception) {
+                ""
+            }
             if (code.isNotBlank()) {
                 cachedJsCode = code
                 return code
@@ -118,7 +127,9 @@ class SimpleLNReaderSource(
                 val body = resp.body.string()
                 if (body.isNotBlank()) {
                     cachedJsCode = body
-                    try { localFile.writeText(body) } catch (_: Exception) {}
+                    try {
+                        localFile.writeText(body)
+                    } catch (_: Exception) {}
                 }
                 body
             } catch (e: Exception) {
@@ -160,7 +171,10 @@ class SimpleLNReaderSource(
     private fun parseDateToLong(raw: String?): Long {
         if (raw.isNullOrBlank()) return 0L
         // try epoch millis string
-        raw.toLongOrNull()?.let { if (it > 1_000_000_000L) return it; if (it > 0) return it * 1000 }
+        raw.toLongOrNull()?.let {
+            if (it > 1_000_000_000L) return it
+            if (it > 0) return it * 1000
+        }
         return try {
             java.time.Instant.parse(raw).toEpochMilli()
         } catch (_: Exception) {
@@ -172,7 +186,9 @@ class SimpleLNReaderSource(
                 } catch (_: Exception) {
                     try {
                         java.time.LocalDateTime.parse(raw.trim()).atZone(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli()
-                    } catch (_: Exception) { 0L }
+                    } catch (_: Exception) {
+                        0L
+                    }
                 }
             }
         }
@@ -325,13 +341,17 @@ class SimpleLNReaderSource(
                 "\"$key\": {\"value\": $valueJson, \"type\": \"$type\"}"
             }
             "{${entries.joinToString(",")}}"
-        } catch (_: Exception) { "{}" }
+        } catch (_: Exception) {
+            "{}"
+        }
     }
 
     override fun getFilterList(): FilterList {
         // Novel: never init QuickJS on UI thread – read from bridgeCache, warmUp async if missing
         filtersJsonCache?.let { cached ->
-            try { return parseFiltersJson(cached) } catch (_: Exception) {}
+            try {
+                return parseFiltersJson(cached)
+            } catch (_: Exception) {}
         }
         // Trigger async warmUp to populate cache for next call (fire-and-forget)
         try {
@@ -498,7 +518,9 @@ class SimpleLNReaderSource(
                 // Novel parity: handle paged sources (totalPages / parsePage) – if chapters empty or totalPages>1, probe parsePage
                 val totalPages = try {
                     obj["totalPages"]?.jsonPrimitive?.content?.toIntOrNull() ?: 1
-                } catch (_: Exception) { 1 }
+                } catch (_: Exception) {
+                    1
+                }
                 if (totalPages > 1 || chapters.isEmpty()) {
                     val hasParsePage = evaluateToString(instance, "typeof plugin.parsePage === 'function'") == "true"
                     val maxPages = if (totalPages > 0) totalPages else 1
@@ -553,7 +575,9 @@ class SimpleLNReaderSource(
                 // evaluateToString already returns string; if plugin returned string, JS returns string directly.
                 // If we used JSON.stringify wrapper, it would be quoted; but we didn't.
                 raw
-            } catch (_: Exception) { raw }
+            } catch (_: Exception) {
+                raw
+            }
             if (html.isBlank()) return@withPlugin ChapterContent.Text("")
             // Return Html if contains tags, else Text
             if (html.contains("<") && html.contains(">")) ChapterContent.Html(html) else ChapterContent.Text(html)
@@ -567,7 +591,9 @@ class SimpleLNReaderSource(
             withPlugin { instance ->
                 evaluateToString(instance, "typeof plugin.getDownloadUrl === 'function'") == "true"
             }
-        } catch (_: Exception) { false }
+        } catch (_: Exception) {
+            false
+        }
     }
 
     /**
@@ -595,7 +621,9 @@ class SimpleLNReaderSource(
                     json.parseToJsonElement(raw).let {
                         (it as? JsonPrimitive)?.contentOrNull ?: raw
                     }
-                } catch (_: Exception) { raw }
+                } catch (_: Exception) {
+                    raw
+                }
                 url.trim().takeIf { it.isNotBlank() }
             }
         } catch (e: Exception) {
@@ -615,11 +643,17 @@ class SimpleLNReaderSource(
                         withPlugin { instance ->
                             evaluateToString(instance, "JSON.stringify(plugin.pluginSettings ?? {})") ?: "{}"
                         }
-                    } catch (_: Exception) { "{}" }
+                    } catch (_: Exception) {
+                        "{}"
+                    }
                 }
             }
             if (settingsJson.isBlank() || settingsJson == "{}") return
-            val obj = try { json.parseToJsonElement(settingsJson) as? JsonObject } catch (_: Exception) { null } ?: return
+            val obj = try {
+                json.parseToJsonElement(settingsJson) as? JsonObject
+            } catch (_: Exception) {
+                null
+            } ?: return
             if (obj.isEmpty()) return
             for ((key, defEl) in obj) {
                 val def = defEl as? JsonObject ?: continue
@@ -660,4 +694,3 @@ class SimpleLNReaderSource(
         }
     }
 }
-

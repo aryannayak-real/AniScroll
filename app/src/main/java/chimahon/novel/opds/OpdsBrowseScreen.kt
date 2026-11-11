@@ -70,7 +70,10 @@ class OpdsBrowseScreen(private val catalogId: String? = null, private val feedUr
         Scaffold(topBar = {
             BrowseNovelSourceToolbar(
                 searchQuery = search,
-                onSearchQueryChange = { search = it; if (it == null) model.search("") },
+                onSearchQueryChange = {
+                    search = it
+                    if (it == null) model.search("")
+                },
                 source = source,
                 displayMode = displayMode,
                 onDisplayModeChange = displayPreference::set,

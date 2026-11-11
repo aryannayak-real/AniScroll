@@ -2,10 +2,6 @@ package chimahon.novel.ui.detail
 
 import android.content.Context
 import androidx.activity.compose.BackHandler
-import androidx.compose.runtime.DisposableEffect
-import androidx.lifecycle.compose.LocalLifecycleOwner
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
@@ -26,8 +22,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Delete
@@ -49,6 +43,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.animateFloatingActionButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -74,16 +69,18 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastAll
 import androidx.compose.ui.util.fastAny
-import tachiyomi.presentation.core.components.material.padding
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import chimahon.novel.data.BookStorage
 import chimahon.novel.download.NovelDownloadManager
 import chimahon.novel.ui.browse.BrowseNovelSourceScreen
 import chimahon.novel.ui.browse.BrowseNovelSourceScreenModel
 import chimahon.novel.ui.browse.NovelWebViewScreen
-import chimahon.novel.data.BookStorage
 import chimahon.novel.ui.reader.NovelReaderActivity
 import eu.kanade.domain.ui.UiPreferences
 import eu.kanade.presentation.category.components.ChangeCategoryDialog
@@ -96,11 +93,8 @@ import eu.kanade.presentation.entries.novel.components.NovelActionRow
 import eu.kanade.presentation.entries.novel.components.NovelCoverDialog
 import eu.kanade.presentation.entries.novel.components.NovelFetchIntervalDialog
 import eu.kanade.presentation.entries.novel.components.NovelInfoBox
-import eu.kanade.tachiyomi.util.system.copyToClipboard
 import eu.kanade.presentation.manga.components.ChapterDownloadAction
 import eu.kanade.presentation.manga.components.MangaChapterListItem
-import tachiyomi.presentation.core.components.FastScrollLazyColumn
-import tachiyomi.presentation.core.util.shouldExpandFAB
 import eu.kanade.presentation.util.Screen
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.sourcenovel.HttpNovelSource
@@ -108,17 +102,23 @@ import eu.kanade.tachiyomi.sourcenovel.NovelSource
 import eu.kanade.tachiyomi.sourcenovel.NovelsPageSource
 import eu.kanade.tachiyomi.sourcenovel.model.SNNovel
 import eu.kanade.tachiyomi.ui.category.CategoryScreen
+import eu.kanade.tachiyomi.util.system.copyToClipboard
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import tachiyomi.domain.episode.service.missingEpisodesCount
 import tachiyomi.domain.library.service.LibraryPreferences
 import tachiyomi.domain.novel.model.Novel
 import tachiyomi.domain.source.novel.model.StubNovelSource
 import tachiyomi.i18n.MR
+import tachiyomi.presentation.core.components.FastScrollLazyColumn
 import tachiyomi.presentation.core.components.SortItem
 import tachiyomi.presentation.core.components.material.PullRefresh
 import tachiyomi.presentation.core.components.material.Scaffold
+import tachiyomi.presentation.core.components.material.padding
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.screens.LoadingScreen
+import tachiyomi.presentation.core.util.shouldExpandFAB
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import kotlin.math.roundToInt
@@ -566,13 +566,17 @@ data class NovelDetailScreen(
                                                 if (folder != null) {
                                                     scope.launch(Dispatchers.IO) {
                                                         val directory = chimahon.novel.source.LocalNovelFiles.ensureReadableDir(context, folder)
-                                                        if (directory != null) withContext(Dispatchers.Main) {
-                                                            NovelReaderActivity.launch(context, directory)
+                                                        if (directory != null) {
+                                                            withContext(Dispatchers.Main) {
+                                                                NovelReaderActivity.launch(context, directory)
+                                                            }
                                                         }
                                                     }
                                                 }
                                             }
-                                        } else null,
+                                        } else {
+                                            null
+                                        },
                                     )
                                 }
                             }
@@ -588,7 +592,8 @@ data class NovelDetailScreen(
                                 }
                             }
 
-                            item(key = "novel_chapter_header") {                                val missingChaptersCount = remember(visibleChapters) {
+                            item(key = "novel_chapter_header") {
+                                val missingChaptersCount = remember(visibleChapters) {
                                     visibleChapters.map { (it.novelChapter?.chapterNumber ?: it.snChapter.chapter_number).toDouble() }
                                         .missingEpisodesCount()
                                 }
@@ -628,13 +633,17 @@ data class NovelDetailScreen(
                                 items(visibleChapters, key = { "ch_${it.snChapter.url}" }) { item ->
                                     val readProgressText = if (item.lastPageRead > 0 && !item.isRead) {
                                         "${item.lastPageRead} chars"
-                                    } else null
+                                    } else {
+                                        null
+                                    }
 
                                     MangaChapterListItem(
                                         title = item.snChapter.name,
                                         date = if (item.snChapter.date_upload > 0) {
                                             relativeDateText(item.snChapter.date_upload)
-                                        } else null,
+                                        } else {
+                                            null
+                                        },
                                         readProgress = readProgressText,
                                         scanlator = item.snChapter.scanlator,
                                         sourceName = null,
@@ -643,7 +652,11 @@ data class NovelDetailScreen(
                                         selected = item.id in state.selectedChapters,
                                         downloadIndicatorEnabled = !isLocalSource,
                                         downloadStateProvider = {
-                                            val dm = try { Injekt.get<chimahon.novel.download.NovelDownloadManager>() } catch (_: Exception) { null }
+                                            val dm = try {
+                                                Injekt.get<chimahon.novel.download.NovelDownloadManager>()
+                                            } catch (_: Exception) {
+                                                null
+                                            }
                                             when (dm?.getDownloadState(item.id)) {
                                                 chimahon.novel.download.NovelDownload.State.DOWNLOADED -> Download.State.DOWNLOADED
                                                 chimahon.novel.download.NovelDownload.State.DOWNLOADING -> Download.State.DOWNLOADING
@@ -793,11 +806,11 @@ private fun openChapter(
 ) {
     onStart()
     screenModel.screenModelScope.launch {
-            try {
-                // Book spine is always reading order (oldest-first), independent of display sort.
-                // The book shell (metadata + chapter list) reuses or rebuilds cheaply;
-                // content resolves on demand through the loader in the reader.
-                val ordered = chapters.sortedBy { it.novelChapter?.chapterNumber ?: it.snChapter.chapter_number }
+        try {
+            // Book spine is always reading order (oldest-first), independent of display sort.
+            // The book shell (metadata + chapter list) reuses or rebuilds cheaply;
+            // content resolves on demand through the loader in the reader.
+            val ordered = chapters.sortedBy { it.novelChapter?.chapterNumber ?: it.snChapter.chapter_number }
             val chapterIndex = ordered.indexOf(item).takeIf { it >= 0 } ?: 0
             // The reader takes identity + target from the row.
             val openNovelId = screenModel.state.value.dbNovel?.id

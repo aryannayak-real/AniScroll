@@ -24,7 +24,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Tab as M3Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -42,41 +41,39 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import cafe.adriel.voyager.core.model.rememberScreenModel
-import dev.icerock.moko.resources.StringResource
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
 import cafe.adriel.voyager.navigator.tab.TabOptions
+import chimahon.novel.ui.browse.novelSourcesTab
+import dev.icerock.moko.resources.StringResource
 import eu.kanade.core.preference.asState
 import eu.kanade.domain.ui.UiPreferences
 import eu.kanade.presentation.components.AppBarActions
 import eu.kanade.presentation.components.BulkSelectionToolbar
 import eu.kanade.presentation.components.SearchToolbar
-import tachiyomi.domain.history.model.SearchHistory
 import eu.kanade.presentation.components.TabContent
-import tachiyomi.presentation.core.components.material.TabText
 import eu.kanade.presentation.util.Tab
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.connections.discord.DiscordRPCService
 import eu.kanade.tachiyomi.data.connections.discord.DiscordScreen
+import eu.kanade.tachiyomi.ui.browse.BulkFavoriteAnimeScreenModel
 import eu.kanade.tachiyomi.ui.browse.animeextension.AnimeExtensionsScreenModel
 import eu.kanade.tachiyomi.ui.browse.animeextension.animeExtensionsTab
 import eu.kanade.tachiyomi.ui.browse.animefeed.AnimeFeedScreenModel
 import eu.kanade.tachiyomi.ui.browse.animefeed.animeFeedTab
 import eu.kanade.tachiyomi.ui.browse.animemigration.sources.migrateAnimeSourceTab
 import eu.kanade.tachiyomi.ui.browse.animesource.animeSourcesTab
-import eu.kanade.tachiyomi.ui.browse.BulkFavoriteAnimeScreenModel
 import eu.kanade.tachiyomi.ui.browse.extension.ExtensionsScreenModel
 import eu.kanade.tachiyomi.ui.browse.extension.extensionsTab
-import eu.kanade.tachiyomi.ui.browse.novelextension.NovelExtensionsScreenModel
-import eu.kanade.tachiyomi.ui.browse.novelextension.novelExtensionsTab
 import eu.kanade.tachiyomi.ui.browse.feed.FeedScreenModel
 import eu.kanade.tachiyomi.ui.browse.feed.feedTab
 import eu.kanade.tachiyomi.ui.browse.migration.sources.migrateSourceTab
+import eu.kanade.tachiyomi.ui.browse.novelextension.NovelExtensionsScreenModel
+import eu.kanade.tachiyomi.ui.browse.novelextension.novelExtensionsTab
 import eu.kanade.tachiyomi.ui.browse.source.globalsearch.GlobalSearchScreen
 import eu.kanade.tachiyomi.ui.browse.source.sourcesTab
-import chimahon.novel.ui.browse.novelSourcesTab
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -87,11 +84,14 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import tachiyomi.core.common.util.lang.launchIO
+import tachiyomi.domain.history.model.SearchHistory
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.material.Scaffold
+import tachiyomi.presentation.core.components.material.TabText
 import tachiyomi.presentation.core.i18n.stringResource
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import androidx.compose.material3.Tab as M3Tab
 
 enum class BrowseViewMode(val labelRes: StringResource) {
     Sources(MR.strings.manga_singular),

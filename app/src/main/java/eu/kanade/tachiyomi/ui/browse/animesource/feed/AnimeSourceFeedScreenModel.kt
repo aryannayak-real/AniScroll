@@ -10,6 +10,8 @@ import cafe.adriel.voyager.core.model.StateScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import dev.icerock.moko.resources.StringResource
 import eu.kanade.core.preference.asState
+import eu.kanade.domain.entries.anime.model.toDomainAnime
+import eu.kanade.domain.entries.anime.model.toSAnime
 import eu.kanade.domain.source.service.SourcePreferences
 import eu.kanade.domain.ui.UiPreferences
 import eu.kanade.presentation.browse.anime.AnimeFeedItemUI
@@ -18,8 +20,7 @@ import eu.kanade.tachiyomi.animesource.AnimeSource
 import eu.kanade.tachiyomi.animesource.model.AnimeFilterList
 import eu.kanade.tachiyomi.animesource.model.SAnime
 import eu.kanade.tachiyomi.ui.browse.animefeed.AnimeMaxFeedItems
-import eu.kanade.domain.entries.anime.model.toDomainAnime
-import eu.kanade.domain.entries.anime.model.toSAnime
+import exh.util.nullIfBlank
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
@@ -39,8 +40,6 @@ import tachiyomi.core.common.util.lang.launchNonCancellable
 import tachiyomi.core.common.util.lang.withIOContext
 import tachiyomi.domain.entries.anime.interactor.GetAnime
 import tachiyomi.domain.entries.anime.interactor.NetworkToLocalAnime
-import exh.util.nullIfBlank
-import tachiyomi.domain.entries.anime.model.Anime as DomainAnime
 import tachiyomi.domain.source.anime.interactor.CountAnimeFeedSavedSearchBySourceId
 import tachiyomi.domain.source.anime.interactor.DeleteAnimeFeedSavedSearchById
 import tachiyomi.domain.source.anime.interactor.GetAnimeFeedSavedSearchBySourceId
@@ -55,6 +54,7 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import xyz.nulldev.ts.api.http.serializer.AnimeFilterSerializer
 import java.util.concurrent.Executors
+import tachiyomi.domain.entries.anime.model.Anime as DomainAnime
 
 open class AnimeSourceFeedScreenModel(
     val sourceId: Long,
@@ -221,7 +221,7 @@ open class AnimeSourceFeedScreenModel(
                     if (anime == null) return@collectLatest
                     value = anime
                 }
-            }
+        }
     }
 
     fun search(query: String?) {

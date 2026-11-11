@@ -2,16 +2,15 @@ package chimahon.novel.interactor
 
 import android.app.Application
 import android.content.Context
-import chimahon.novel.source.LocalNovelFiles
-import chimahon.novel.source.NovelLocalSource
 import chimahon.novel.data.BookMetadata
 import chimahon.novel.data.BookStorage
 import chimahon.novel.data.NovelCategory
 import chimahon.novel.data.NovelCategoryStorage
+import chimahon.novel.source.LocalNovelFiles
+import chimahon.novel.source.NovelLocalSource
 import eu.kanade.tachiyomi.sourcenovel.model.SNNovel
 import logcat.LogPriority
 import tachiyomi.core.common.util.system.logcat
-import java.io.File
 import tachiyomi.domain.library.service.NovelLibraryPreferences
 import tachiyomi.domain.novel.model.Novel
 import tachiyomi.domain.novel.model.NovelCategory.Companion.SYSTEM_CATEGORY_ID
@@ -26,6 +25,7 @@ import tachiyomi.domain.novel.repository.NovelReadingStatsRepository
 import tachiyomi.domain.novel.repository.NovelRepository
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import java.io.File
 
 /**
  * One-shot migration of chimareader's JSON files into the database.

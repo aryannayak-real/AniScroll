@@ -12,12 +12,12 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import tachiyomi.domain.library.service.NovelLibraryPreferences
-import tachiyomi.domain.novel.model.NovelCategory as DbNovelCategory
 import tachiyomi.domain.novel.repository.NovelCategoryRepository
 import tachiyomi.domain.novel.repository.NovelRepository
 import tachiyomi.i18n.MR
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import tachiyomi.domain.novel.model.NovelCategory as DbNovelCategory
 
 /**
  * Novel categories backed by the DB repository. The UI keeps the existing

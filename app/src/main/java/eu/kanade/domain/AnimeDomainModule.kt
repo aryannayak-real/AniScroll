@@ -1,31 +1,40 @@
 package eu.kanade.domain
 
-import eu.kanade.domain.track.anime.interactor.AddAnimeTracks
-import eu.kanade.domain.track.anime.interactor.RefreshAnimeTracks
-import eu.kanade.domain.entries.anime.interactor.UpdateAnime as AppUpdateAnime
 import eu.kanade.domain.entries.anime.interactor.SyncSeasonsWithSource
-import eu.kanade.domain.episode.interactor.SetSeenStatus as AppSetSeenStatus
-import eu.kanade.domain.track.interactor.SyncEpisodeProgressWithTrack
-import eu.kanade.domain.track.interactor.TrackEpisode
 import eu.kanade.domain.episode.interactor.GetAvailableAnimeScanlators
 import eu.kanade.domain.episode.interactor.GetExcludedAnimeScanlators
 import eu.kanade.domain.episode.interactor.SetExcludedAnimeScanlators
+import eu.kanade.domain.episode.interactor.SyncEpisodesWithSource
+import eu.kanade.domain.track.anime.interactor.AddAnimeTracks
+import eu.kanade.domain.track.anime.interactor.RefreshAnimeTracks
+import eu.kanade.domain.track.interactor.SyncEpisodeProgressWithTrack
+import eu.kanade.domain.track.interactor.TrackEpisode
 import mihon.domain.animemigration.usecases.MigrateAnimeUseCase
-import tachiyomi.data.entries.anime.CustomAnimeRepositoryImpl
-import tachiyomi.data.entries.anime.AnimeRepositoryImpl
-import tachiyomi.data.entries.anime.AnimeMergeRepositoryImpl
 import tachiyomi.data.category.AnimeCategoryRepositoryImpl
+import tachiyomi.data.entries.anime.AnimeMergeRepositoryImpl
+import tachiyomi.data.entries.anime.AnimeRepositoryImpl
+import tachiyomi.data.entries.anime.CustomAnimeRepositoryImpl
 import tachiyomi.data.episode.EpisodeRepositoryImpl
 import tachiyomi.data.source.anime.AnimeFeedSavedSearchRepositoryImpl
 import tachiyomi.data.source.anime.AnimeSavedSearchRepositoryImpl
+import tachiyomi.domain.category.interactor.CreateAnimeCategory
+import tachiyomi.domain.category.interactor.DeleteAnimeCategory
+import tachiyomi.domain.category.interactor.GetAnimeCategories
+import tachiyomi.domain.category.interactor.HideAnimeCategory
+import tachiyomi.domain.category.interactor.RenameAnimeCategory
+import tachiyomi.domain.category.interactor.ReorderAnimeCategory
+import tachiyomi.domain.category.interactor.SetAnimeCategories
+import tachiyomi.domain.category.interactor.SetSortModeForAnimeCategory
+import tachiyomi.domain.category.repository.AnimeCategoryRepository
+import tachiyomi.domain.download.service.DownloadPreferences
 import tachiyomi.domain.entries.anime.interactor.DeleteAnimeById
 import tachiyomi.domain.entries.anime.interactor.DeleteByMergeId
 import tachiyomi.domain.entries.anime.interactor.DeleteMergeById
+import tachiyomi.domain.entries.anime.interactor.FetchInterval
 import tachiyomi.domain.entries.anime.interactor.GetAllAnime
 import tachiyomi.domain.entries.anime.interactor.GetAnime
 import tachiyomi.domain.entries.anime.interactor.GetAnimeBySource
 import tachiyomi.domain.entries.anime.interactor.GetAnimeByUrlAndSourceId
-import tachiyomi.domain.entries.anime.interactor.FetchInterval
 import tachiyomi.domain.entries.anime.interactor.GetAnimeSeasonsByParentId
 import tachiyomi.domain.entries.anime.interactor.GetAnimeWithEpisodes
 import tachiyomi.domain.entries.anime.interactor.GetCustomAnimeInfo
@@ -40,16 +49,26 @@ import tachiyomi.domain.entries.anime.interactor.GetMergedReferencesById
 import tachiyomi.domain.entries.anime.interactor.GetSeenAnimeNotInLibraryView
 import tachiyomi.domain.entries.anime.interactor.NetworkToLocalAnime
 import tachiyomi.domain.entries.anime.interactor.ResetViewerFlags
-import tachiyomi.domain.entries.anime.interactor.SetCustomAnimeInfo
 import tachiyomi.domain.entries.anime.interactor.SetAnimeEpisodeFlags
 import tachiyomi.domain.entries.anime.interactor.SetAnimeSeasonFlags
-import tachiyomi.domain.entries.anime.interactor.UpdateAnime as DomainUpdateAnime
+import tachiyomi.domain.entries.anime.interactor.SetCustomAnimeInfo
 import tachiyomi.domain.entries.anime.interactor.UpdateMergedSettings
 import tachiyomi.domain.entries.anime.repository.AnimeMergeRepository
 import tachiyomi.domain.entries.anime.repository.AnimeRepository
 import tachiyomi.domain.entries.anime.repository.CustomAnimeRepository
-import tachiyomi.domain.source.anime.interactor.GetAnimeSourcesWithNonLibraryAnime
-import tachiyomi.domain.source.anime.service.AnimeSourceManager
+import tachiyomi.domain.episode.interactor.FilterEpisodesForDownload
+import tachiyomi.domain.episode.interactor.GetEpisode
+import tachiyomi.domain.episode.interactor.GetEpisodesByAnimeId
+import tachiyomi.domain.episode.interactor.GetMergedEpisodesByAnimeId
+import tachiyomi.domain.episode.interactor.SetAnimeDefaultEpisodeFlags
+import tachiyomi.domain.episode.interactor.ShouldUpdateDbEpisode
+import tachiyomi.domain.episode.interactor.UpdateEpisode
+import tachiyomi.domain.episode.repository.EpisodeRepository
+import tachiyomi.domain.history.interactor.GetNextEpisodes
+import tachiyomi.domain.library.service.AnimeLibraryPreferences
+import tachiyomi.domain.library.service.LibraryPreferences
+import tachiyomi.domain.season.interactor.SetAnimeDefaultSeasonFlags
+import tachiyomi.domain.season.interactor.ShouldUpdateDbSeason
 import tachiyomi.domain.source.anime.interactor.CountAnimeFeedSavedSearchBySourceId
 import tachiyomi.domain.source.anime.interactor.CountAnimeFeedSavedSearchGlobal
 import tachiyomi.domain.source.anime.interactor.DeleteAnimeFeedSavedSearchById
@@ -60,45 +79,26 @@ import tachiyomi.domain.source.anime.interactor.GetAnimeSavedSearchById
 import tachiyomi.domain.source.anime.interactor.GetAnimeSavedSearchBySourceId
 import tachiyomi.domain.source.anime.interactor.GetAnimeSavedSearchBySourceIdFeed
 import tachiyomi.domain.source.anime.interactor.GetAnimeSavedSearchGlobalFeed
+import tachiyomi.domain.source.anime.interactor.GetAnimeSourcesWithNonLibraryAnime
 import tachiyomi.domain.source.anime.interactor.InsertAnimeFeedSavedSearch
 import tachiyomi.domain.source.anime.interactor.InsertAnimeSavedSearch
 import tachiyomi.domain.source.anime.interactor.ReorderAnimeFeed
 import tachiyomi.domain.source.anime.repository.AnimeFeedSavedSearchRepository
 import tachiyomi.domain.source.anime.repository.AnimeSavedSearchRepository
-import tachiyomi.domain.category.interactor.CreateAnimeCategory
-import tachiyomi.domain.category.interactor.DeleteAnimeCategory
-import tachiyomi.domain.category.interactor.GetAnimeCategories
-import tachiyomi.domain.category.interactor.HideAnimeCategory
-import tachiyomi.domain.category.interactor.RenameAnimeCategory
-import tachiyomi.domain.category.interactor.ReorderAnimeCategory
-import tachiyomi.domain.category.interactor.SetAnimeCategories
-import tachiyomi.domain.category.interactor.SetSortModeForAnimeCategory
-import tachiyomi.domain.category.repository.AnimeCategoryRepository
-import eu.kanade.domain.episode.interactor.SyncEpisodesWithSource
-import tachiyomi.domain.episode.interactor.FilterEpisodesForDownload
-import tachiyomi.domain.episode.interactor.GetEpisode
-import tachiyomi.domain.episode.interactor.GetEpisodesByAnimeId
-import tachiyomi.domain.episode.interactor.GetMergedEpisodesByAnimeId
-import tachiyomi.domain.episode.interactor.SetAnimeDefaultEpisodeFlags
-import tachiyomi.domain.episode.interactor.SetSeenStatus as DomainSetSeenStatus
-import tachiyomi.domain.season.interactor.SetAnimeDefaultSeasonFlags
-import tachiyomi.domain.season.interactor.ShouldUpdateDbSeason
-import tachiyomi.domain.episode.interactor.ShouldUpdateDbEpisode
-import tachiyomi.domain.episode.interactor.UpdateEpisode
-import tachiyomi.domain.episode.repository.EpisodeRepository
-import tachiyomi.domain.history.interactor.GetNextEpisodes
-import tachiyomi.domain.download.service.DownloadPreferences
-import tachiyomi.domain.library.service.AnimeLibraryPreferences
-import tachiyomi.domain.library.service.LibraryPreferences
-import tachiyomi.domain.track.anime.interactor.InsertAnimeTrack
+import tachiyomi.domain.source.anime.service.AnimeSourceManager
 import tachiyomi.domain.track.anime.interactor.DeleteAnimeTrack
 import tachiyomi.domain.track.anime.interactor.GetAnimeTracks
 import tachiyomi.domain.track.anime.interactor.GetTracksPerAnime
+import tachiyomi.domain.track.anime.interactor.InsertAnimeTrack
 import uy.kohesive.injekt.api.InjektModule
 import uy.kohesive.injekt.api.InjektRegistrar
 import uy.kohesive.injekt.api.addFactory
 import uy.kohesive.injekt.api.addSingletonFactory
 import uy.kohesive.injekt.api.get
+import eu.kanade.domain.entries.anime.interactor.UpdateAnime as AppUpdateAnime
+import eu.kanade.domain.episode.interactor.SetSeenStatus as AppSetSeenStatus
+import tachiyomi.domain.entries.anime.interactor.UpdateAnime as DomainUpdateAnime
+import tachiyomi.domain.episode.interactor.SetSeenStatus as DomainSetSeenStatus
 
 class AnimeDomainModule : InjektModule {
 

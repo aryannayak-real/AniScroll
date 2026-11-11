@@ -8,17 +8,17 @@ import chimahon.novel.data.NovelCategory
 import chimahon.novel.manager.NovelSourceManager
 import chimahon.novel.ui.detail.SourceChapterBookBuilder
 import eu.kanade.tachiyomi.data.backup.models.BackupChapter
-import eu.kanade.tachiyomi.util.lang.Hash
 import eu.kanade.tachiyomi.data.backup.models.BackupNovel
 import eu.kanade.tachiyomi.data.backup.models.BackupNovelCategory
 import eu.kanade.tachiyomi.data.backup.models.BackupNovelHistory
 import eu.kanade.tachiyomi.data.backup.models.BackupStatEntry
 import eu.kanade.tachiyomi.data.backup.models.toBackupChapter
+import eu.kanade.tachiyomi.util.lang.Hash
 import tachiyomi.domain.novel.model.Novel
 import tachiyomi.domain.novel.model.toSNNovel
-import java.io.File
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import java.io.File
 
 class NovelBackupCreator(
     private val context: Context,
@@ -29,7 +29,7 @@ class NovelBackupCreator(
     private val novelCategoryRepository: tachiyomi.domain.novel.repository.NovelCategoryRepository = Injekt.get(),
 ) {
 
-    private val TAG = "NovelBackupCreator"
+    private val tag = "NovelBackupCreator"
 
     suspend fun backupNovels(): List<BackupNovel> {
         val backupNovelsById = linkedMapOf<String, BackupNovel>()
@@ -67,7 +67,7 @@ class NovelBackupCreator(
                     mergeBackupNovel(existing, backupNovel)
                 }
             } catch (e: Exception) {
-                Log.e(TAG, "Failed to backup novel in ${entry.directory.name}", e)
+                Log.e(tag, "Failed to backup novel in ${entry.directory.name}", e)
             }
         }
 
@@ -81,7 +81,7 @@ class NovelBackupCreator(
                 id = it.id.toString(),
                 name = it.name,
                 order = it.order.toLong(),
-                flags = it.flags
+                flags = it.flags,
             )
         }
     }
@@ -175,7 +175,7 @@ class NovelBackupCreator(
             lastModified = dbContent?.lastModified ?: bookmark?.lastModified ?: 0L,
             stats = mergeBackupStats(backupStats),
             categoryIds = normalizeCategoryIds(
-                dbContent?.categoryIds ?: metadata.categoryIds
+                dbContent?.categoryIds ?: metadata.categoryIds,
             ),
             lang = metadata.lang,
             chapters = backupChapters(entry),
@@ -264,5 +264,4 @@ class NovelBackupCreator(
         val directory: File,
         val metadata: BookMetadata,
     )
-
 }

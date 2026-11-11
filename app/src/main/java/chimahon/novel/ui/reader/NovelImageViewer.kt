@@ -170,8 +170,11 @@ fun NovelImageViewer(
                     clipToPadding = false
                     clipChildren = false
                     onLoadComplete = { success ->
-                        loadState = if (success) ImageViewerLoadState.Ready
-                        else ImageViewerLoadState.Failed
+                        loadState = if (success) {
+                            ImageViewerLoadState.Ready
+                        } else {
+                            ImageViewerLoadState.Failed
+                        }
                     }
                 }
             },
@@ -186,8 +189,11 @@ fun NovelImageViewer(
                 view.isPopupActive = isPopupActive
                 view.onDismissPopup = onDismissPopupRequested
                 view.onLoadComplete = { success ->
-                    loadState = if (success) ImageViewerLoadState.Ready
-                    else ImageViewerLoadState.Failed
+                    loadState = if (success) {
+                        ImageViewerLoadState.Ready
+                    } else {
+                        ImageViewerLoadState.Failed
+                    }
                 }
                 view.loadImage(context, imageUri)
             },
@@ -530,7 +536,9 @@ private class NovelSubsamplingImageView(context: Context) : SubsamplingScaleImag
         val target = hit.value
         if (hit.lineOffset !in target.line.text.indices ||
             !isOcrLookupStartChar(target.line.text[hit.lineOffset])
-        ) return null
+        ) {
+            return null
+        }
         val lookupText = if (scanWholeWord) {
             val line = target.line.text
             extractWholeWord(line, hit.lineOffset, 0, line.length)
@@ -675,4 +683,3 @@ private fun saveImage(context: Context, bitmap: Bitmap) {
         MediaScannerConnection.scanFile(context, arrayOf(image.absolutePath), arrayOf("image/png"), null)
     }
 }
-

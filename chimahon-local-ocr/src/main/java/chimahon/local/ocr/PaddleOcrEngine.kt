@@ -10,13 +10,13 @@ import chimahon.ocr.NormalizedBBox
 import chimahon.ocr.OcrBitmapDecoder
 import chimahon.ocr.OcrLanguage
 import chimahon.ocr.WritingDirection
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.sync.Semaphore
 import java.io.Closeable
 import java.io.File
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.atan2
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.sync.Semaphore
 
 // Detection/recognition thresholds copied from the ocrtest "Full Page Preset"
 // (full-page manga mode). Bubble preset (0.20/0.45/1.60) is intentionally not

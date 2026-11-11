@@ -18,6 +18,7 @@ import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.work.Configuration
 import androidx.work.WorkManager
+import chimahon.novel.data.BookStorage
 import chimahon.novel.source.LocalNovelFiles
 import coil3.ImageLoader
 import coil3.SingletonImageLoader
@@ -28,7 +29,6 @@ import coil3.network.okhttp.OkHttpNetworkFetcherFactory
 import coil3.request.allowRgb565
 import coil3.request.crossfade
 import coil3.util.DebugLogger
-import chimahon.novel.data.BookStorage
 import com.elvishew.xlog.LogConfiguration
 import com.elvishew.xlog.LogLevel
 import com.elvishew.xlog.XLog
@@ -48,8 +48,8 @@ import eu.kanade.domain.ui.model.setAppCompatDelegateThemeMode
 import eu.kanade.tachiyomi.core.security.PrivacyPreferences
 import eu.kanade.tachiyomi.crash.CrashActivity
 import eu.kanade.tachiyomi.crash.GlobalExceptionHandler
-import eu.kanade.tachiyomi.data.coil.AnimeImageFetcher
 import eu.kanade.tachiyomi.data.coil.AnimeCoverKeyer
+import eu.kanade.tachiyomi.data.coil.AnimeImageFetcher
 import eu.kanade.tachiyomi.data.coil.AnimeKeyer
 import eu.kanade.tachiyomi.data.coil.BufferedSourceFetcher
 import eu.kanade.tachiyomi.data.coil.MangaCoverFetcher
@@ -225,7 +225,7 @@ class App : Application(), DefaultLifecycleObserver, SingletonImageLoader.Factor
         }
 
         initializeMigrator()
-        
+
         // Chimahon -->
         chimahon.novel.data.NovelMigration.migrateOldBooks(this)
         // Public local-novels root (manga <base>/local/ mirror); readers resolve it.
@@ -339,7 +339,7 @@ class App : Application(), DefaultLifecycleObserver, SingletonImageLoader.Factor
         // AM (DISCORD) -->
         DiscordRPCService.stop(applicationContext)
         // <-- AM (DISCORD)
-        
+
         eu.kanade.tachiyomi.glance.ChimahonWidgetManager.updateAllWidgets(this)
     }
 

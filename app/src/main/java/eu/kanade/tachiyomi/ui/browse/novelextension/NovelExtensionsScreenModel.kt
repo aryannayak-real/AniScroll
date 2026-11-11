@@ -320,7 +320,9 @@ class NovelExtensionsScreenModel(
         if (extension.pkgName.startsWith("js.")) {
             val id = extension.pkgName.removePrefix("js.")
             screenModelScope.launchIO {
-                try { pluginManager.uninstall(id) } catch (_: Exception) {}
+                try {
+                    pluginManager.uninstall(id)
+                } catch (_: Exception) {}
             }
             return
         }
@@ -330,8 +332,12 @@ class NovelExtensionsScreenModel(
     fun findAvailableExtensions() {
         screenModelScope.launchIO {
             mutableState.update { it.copy(isRefreshing = true) }
-            try { extensionManager.findAvailableExtensions() } catch (_: Exception) {}
-            try { pluginManager.refresh() } catch (_: Exception) {}
+            try {
+                extensionManager.findAvailableExtensions()
+            } catch (_: Exception) {}
+            try {
+                pluginManager.refresh()
+            } catch (_: Exception) {}
             try {
                 val updates = pluginManager.catalog.value.installed.count { pluginManager.hasUpdate(it.descriptor.id) }
                 preferences.novelExtensionUpdatesCount().set(updates)
@@ -351,8 +357,10 @@ class NovelExtensionsScreenModel(
     fun getJsPluginSite(pkgName: String): String? {
         val id = pkgName.removePrefix("js.")
         val catalog = pluginManager.catalog.value
-        return (catalog.installed.find { it.descriptor.id == id }?.descriptor
-            ?: catalog.available.find { it.id == id })
+        return (
+            catalog.installed.find { it.descriptor.id == id }?.descriptor
+                ?: catalog.available.find { it.id == id }
+            )
             ?.site?.takeIf { it.isNotBlank() }
     }
 }

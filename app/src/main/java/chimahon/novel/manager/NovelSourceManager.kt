@@ -23,6 +23,7 @@ class NovelSourceManager(
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val allSourcesFlow = MutableStateFlow<Map<Long, NovelsPageSource>>(emptyMap())
+
     @Volatile private var stubMap: Map<Long, NovelsPageSource> = emptyMap()
     private val _isInitialized = MutableStateFlow(false)
     val isInitialized: StateFlow<Boolean> = _isInitialized.asStateFlow()

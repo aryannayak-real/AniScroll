@@ -1,12 +1,12 @@
 package tachiyomi.data.source.anime
 
 import kotlinx.coroutines.flow.Flow
-import tachiyomi.mi.data.AnimeDatabase
 import tachiyomi.data.handlers.anime.AnimeDatabaseHandler
 import tachiyomi.domain.source.anime.model.AnimeFeedSavedSearch
 import tachiyomi.domain.source.anime.model.AnimeFeedSavedSearchUpdate
 import tachiyomi.domain.source.anime.model.AnimeSavedSearch
 import tachiyomi.domain.source.anime.repository.AnimeFeedSavedSearchRepository
+import tachiyomi.mi.data.AnimeDatabase
 
 class AnimeFeedSavedSearchRepositoryImpl(
     private val handler: AnimeDatabaseHandler,

@@ -21,9 +21,9 @@ import androidx.glance.layout.width
 import com.canopus.chimareader.data.AnkiStatsStorage
 import com.canopus.chimareader.data.MangaStatsStorage
 import eu.kanade.tachiyomi.R
+import tachiyomi.core.common.Constants
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
-import tachiyomi.core.common.Constants
 import java.time.LocalDate
 import java.util.concurrent.TimeUnit
 

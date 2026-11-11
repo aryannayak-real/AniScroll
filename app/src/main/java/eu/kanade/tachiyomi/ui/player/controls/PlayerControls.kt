@@ -219,10 +219,12 @@ fun PlayerControls(
     )
     Box(Modifier.fillMaxSize()) {
         if (subtitleLookupRequest != null) {
-            Box(Modifier.fillMaxSize().clickable {
-                subtitleLookupRequest = null
-                if (!wasPlayerAlreadyPause) viewModel.unpause()
-            })
+            Box(
+                Modifier.fillMaxSize().clickable {
+                    subtitleLookupRequest = null
+                    if (!wasPlayerAlreadyPause) viewModel.unpause()
+                },
+            )
         }
         val highlightColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.45f)
         Canvas(Modifier.fillMaxSize()) {
@@ -418,7 +420,7 @@ fun PlayerControls(
                 }
                 AnimatedVisibility(
                     visible =
-                    (controlsShown && !areControlsLocked || gestureSeekAmount != null) ||
+                    ((controlsShown && !areControlsLocked) || gestureSeekAmount != null) ||
                         isLoading ||
                         isLoadingEpisode,
                     enter = fadeIn(playerControlsEnterAnimationSpec()),

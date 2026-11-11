@@ -1,8 +1,8 @@
 package mihon.core.migration.migrations
 
 import android.app.Application
-import chimahon.novel.interactor.SyncNovelChapters
 import chimahon.novel.data.BookStorage
+import chimahon.novel.interactor.SyncNovelChapters
 import eu.kanade.tachiyomi.sourcenovel.model.SNChapter
 import eu.kanade.tachiyomi.sourcenovel.model.SNNovel
 import kotlinx.serialization.json.Json

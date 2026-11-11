@@ -6,14 +6,6 @@ import androidx.core.app.NotificationCompat
 import eu.kanade.tachiyomi.data.model.ModelBundleInstaller
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.util.system.notify
-import mihon.domain.panel.repository.PanelDetectionRepository
-import uy.kohesive.injekt.Injekt
-import uy.kohesive.injekt.api.get
-import java.io.File
-import java.io.FileOutputStream
-import java.io.InputStream
-import java.security.MessageDigest
-import java.util.zip.ZipInputStream
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -23,10 +15,18 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import mihon.domain.panel.repository.PanelDetectionRepository
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import tachiyomi.core.common.preference.Preference
 import tachiyomi.core.common.preference.PreferenceStore
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
+import java.io.File
+import java.io.FileOutputStream
+import java.io.InputStream
+import java.security.MessageDigest
+import java.util.zip.ZipInputStream
 
 /**
  * Downloads the panel detection model and the LiteRT native libraries at runtime.
@@ -199,7 +199,9 @@ class PanelModelDownloader(
             val hash = fileHash(model)
             check(expectedHash.isBlank() || hash == expectedHash) { "Panel model checksum mismatch" }
             ModelBundleInstaller.replace(
-                staging, context.filesDir, MODEL_ROOT_DIR,
+                staging,
+                context.filesDir,
+                MODEL_ROOT_DIR,
                 listOf("model.tflite", "lib/$abi/$LITE_RT_SO", "lib/$abi/$LITERT_JNI_SO"),
             )
             installedRevision.set(revision)

@@ -112,7 +112,7 @@ fun DictionaryEntryWebView(
             getDictionaryColorScheme(isDark, isAmoled, seedColor)
         }
     }
-    val BgColor = remember(isDark, isAmoled, seedColor, colorScheme) {
+    val bgColor = remember(isDark, isAmoled, seedColor, colorScheme) {
         if (isAmoled && isDark) Color.Black else colorScheme.surface
     }
     val wordAudioAutoplay by prefs.wordAudioAutoplay().collectAsState()
@@ -227,7 +227,9 @@ fun DictionaryEntryWebView(
                             }
                             else -> false
                         }
-                    } else false
+                    } else {
+                        false
+                    }
                 }
 
                 webView
@@ -239,8 +241,8 @@ fun DictionaryEntryWebView(
                 }
                 state.onAnkiLookup = onAnkiLookup
                 state.ankiJsBridge.onAnkiLookup = onAnkiLookup
-state.onRecursiveLookup = onRecursiveLookup
-                    state.onTabSelect = onTabSelect
+                state.onRecursiveLookup = onRecursiveLookup
+                state.onTabSelect = onTabSelect
                 state.onBack = onBack
                 state.customCss = customCss
                 state.fontSize = fontSize

@@ -214,7 +214,7 @@ object PlayerSettingsPlayerScreen : SearchableSettings {
                     preference = hideTime,
                     title = stringResource(MR.strings.pref_player_time_to_disappear),
                     entries = listOf(500, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000).associateWith {
-                        "${stringResource(MR.strings.pref_player_time_to_disappear_summary)} ${it} ms"
+                        "${stringResource(MR.strings.pref_player_time_to_disappear_summary)} $it ms"
                     }.toPersistentMap(),
                 ),
                 Preference.PreferenceItem.SliderPreference(

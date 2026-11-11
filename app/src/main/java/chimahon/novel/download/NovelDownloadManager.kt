@@ -95,7 +95,9 @@ class NovelDownloadManager(
         scope.launch {
             val dbChapters = try {
                 Injekt.get<NovelChapterRepository>().getChaptersByNovelId(novel.id)
-            } catch (_: Exception) { emptyList() }
+            } catch (_: Exception) {
+                emptyList()
+            }
             val dbByUrl = dbChapters.associateBy { it.url }
             // DB rows only: hash fallbacks create phantom ids that can never match.
             val toDownload = chapters.mapNotNull { ch ->

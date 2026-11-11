@@ -6,7 +6,7 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 
-/**
+/*
  * Parallel helpers matching extensions-lib (eu.kanade.tachiyomi.util stubs).
  * Extensions link against these; they must exist at runtime with identical signatures.
  */
@@ -75,7 +75,9 @@ suspend inline fun <A, B> Iterable<A>.parallelCatchingFlatMap(crossinline f: sus
     withContext(Dispatchers.IO) {
         map {
             async {
-                try { f(it) } catch (e: Throwable) {
+                try {
+                    f(it)
+                } catch (e: Throwable) {
                     e.printStackTrace()
                     emptyList()
                 }

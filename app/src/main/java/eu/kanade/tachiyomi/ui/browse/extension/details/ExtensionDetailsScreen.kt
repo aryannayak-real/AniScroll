@@ -65,7 +65,9 @@ data class ExtensionDetailsScreen(
             onClickSourcePreferences = { sourceId ->
                 val novelSource = try {
                     Injekt.get<chimahon.novel.manager.NovelSourceManager>().getNovelSource(sourceId)
-                } catch (_: Exception) { null }
+                } catch (_: Exception) {
+                    null
+                }
                 if (novelSource != null) {
                     navigator.push(eu.kanade.tachiyomi.ui.browse.novel.NovelSourcePreferencesScreen(sourceId))
                 } else {

@@ -28,11 +28,26 @@ class OcrStoreTest {
         every { preferences.getInt(any(), any()) } answers { values[firstArg()] as? Int ?: secondArg() }
         every { preferences.getBoolean(any(), any()) } answers { values[firstArg()] as? Boolean ?: secondArg() }
         every { preferences.edit() } returns editor
-        every { editor.putString(any(), any()) } answers { values[firstArg()] = secondArg<String>(); editor }
-        every { editor.putInt(any(), any()) } answers { values[firstArg()] = secondArg<Int>(); editor }
-        every { editor.putBoolean(any(), any()) } answers { values[firstArg()] = secondArg<Boolean>(); editor }
-        every { editor.remove(any()) } answers { values.remove(firstArg<String>()); editor }
-        every { editor.clear() } answers { values.clear(); editor }
+        every { editor.putString(any(), any()) } answers {
+            values[firstArg()] = secondArg<String>()
+            editor
+        }
+        every { editor.putInt(any(), any()) } answers {
+            values[firstArg()] = secondArg<Int>()
+            editor
+        }
+        every { editor.putBoolean(any(), any()) } answers {
+            values[firstArg()] = secondArg<Boolean>()
+            editor
+        }
+        every { editor.remove(any()) } answers {
+            values.remove(firstArg<String>())
+            editor
+        }
+        every { editor.clear() } answers {
+            values.clear()
+            editor
+        }
         every { editor.commit() } returns true
     }
 

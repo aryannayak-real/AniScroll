@@ -7,7 +7,10 @@ import org.junit.jupiter.api.Test
 
 class PlaybackEpisodeOrderTest {
     private fun episodes(vararg numbers: Float) = numbers.mapIndexed { index, number ->
-        EpisodeImpl().apply { id = index.toLong(); episode_number = number }
+        EpisodeImpl().apply {
+            id = index.toLong()
+            episode_number = number
+        }
     }
 
     @Test

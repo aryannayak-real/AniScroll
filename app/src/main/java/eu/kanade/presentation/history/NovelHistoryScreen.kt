@@ -33,7 +33,6 @@ import eu.kanade.presentation.manga.components.DotSeparatorText
 import eu.kanade.presentation.manga.components.MangaCover
 import eu.kanade.presentation.util.formatChapterNumber
 import eu.kanade.tachiyomi.ui.history.novel.NovelHistoryScreenModel
-import tachiyomi.domain.manga.model.MangaCover as DomainMangaCover
 import eu.kanade.tachiyomi.util.lang.toLocalDate
 import eu.kanade.tachiyomi.util.lang.toTimestampString
 import tachiyomi.domain.novel.model.NovelHistoryEntry
@@ -43,6 +42,7 @@ import tachiyomi.presentation.core.components.material.padding
 import tachiyomi.presentation.core.i18n.stringResource
 import java.time.LocalDate
 import java.util.Date
+import tachiyomi.domain.manga.model.MangaCover as DomainMangaCover
 
 sealed interface NovelHistoryUiModel {
     data class Item(val entry: NovelHistoryEntry) : NovelHistoryUiModel

@@ -174,10 +174,14 @@ class NovelDetailScreenModel(
                 folder.takeIf { BookStorage.hasReadableBookContent(app, it) }
             } ?: return
             mutableState.update {
-                if (it.fileDownload != FileDownloadState.Idle) it else it.copy(
-                    isDownloadSource = true,
-                    fileDownload = FileDownloadState.Done(it.novel.title, folder, folder),
-                )
+                if (it.fileDownload != FileDownloadState.Idle) {
+                    it
+                } else {
+                    it.copy(
+                        isDownloadSource = true,
+                        fileDownload = FileDownloadState.Done(it.novel.title, folder, folder),
+                    )
+                }
             }
         } catch (error: CancellationException) {
             throw error
@@ -475,7 +479,8 @@ class NovelDetailScreenModel(
         downloadManager.deleteChapter(dbNovel, dbChapter, source)
     }
 
-    fun downloadChapters(action: DownloadAction) {        val dbNovel = cachedDbNovel ?: return
+    fun downloadChapters(action: DownloadAction) {
+        val dbNovel = cachedDbNovel ?: return
         // Next = oldest unread in reading order, independent of display sort
         val unread = mutableState.value.chapters
             .sortedBy { it.novelChapter?.chapterNumber ?: it.snChapter.chapter_number }
@@ -642,7 +647,7 @@ class NovelDetailScreenModel(
                 NovelChapterUpdate(
                     id = dbChapter.id,
                     read = true,
-                )
+                ),
             )
         }
     }
@@ -674,7 +679,7 @@ class NovelDetailScreenModel(
                 .filter { it.bookmark != bookmarked }
                 .forEach { dbCh ->
                     novelChapterRepository.update(
-                        NovelChapterUpdate(id = dbCh.id, bookmark = bookmarked)
+                        NovelChapterUpdate(id = dbCh.id, bookmark = bookmarked),
                     )
                 }
             clearSelection()
@@ -740,7 +745,7 @@ class NovelDetailScreenModel(
         val dbChapter = chapter.novelChapter ?: return
         screenModelScope.launch {
             novelChapterRepository.update(
-                NovelChapterUpdate(id = dbChapter.id, bookmark = !dbChapter.bookmark)
+                NovelChapterUpdate(id = dbChapter.id, bookmark = !dbChapter.bookmark),
             )
         }
     }

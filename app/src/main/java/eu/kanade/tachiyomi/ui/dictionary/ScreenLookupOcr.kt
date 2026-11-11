@@ -56,7 +56,11 @@ internal fun OcrTextBlock.screenLookupLineHit(tapX: Float, tapY: Float, width: F
                 bottom = geo.ymax * height,
                 rotation = geo.rotation,
                 vertical = OcrHitTester.isLineVertical(
-                    vertical, geo.xmin * width, geo.ymin * height, geo.xmax * width, geo.ymax * height,
+                    vertical,
+                    geo.xmin * width,
+                    geo.ymin * height,
+                    geo.xmax * width,
+                    geo.ymax * height,
                 ),
             ).also { offset += lines[index].length }
         }

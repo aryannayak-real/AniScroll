@@ -60,11 +60,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
 import chimahon.novel.data.CustomReaderTheme
 import chimahon.novel.data.FontManager
@@ -590,38 +590,38 @@ fun AppearanceSheet(
 
                         if (viewModel.einkRefreshOnPageTurn) {
 // Duration
-                                Column {
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.SpaceBetween,
-                                    ) {
-                                        Text("Duration", style = MaterialTheme.typography.bodyMedium)
-                                        Text("${viewModel.einkRefreshDurationMillis} ms", style = MaterialTheme.typography.bodyMedium)
-                                    }
-                                    Slider(
-                                        value = (viewModel.einkRefreshDurationMillis / 100).toFloat(),
-                                        onValueChange = { viewModel.updateEinkRefreshDurationMillis((it * 100).roundToInt()) },
-                                        valueRange = 1f..15f,
-                                        steps = 14,
-                                    )
+                            Column {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                ) {
+                                    Text("Duration", style = MaterialTheme.typography.bodyMedium)
+                                    Text("${viewModel.einkRefreshDurationMillis} ms", style = MaterialTheme.typography.bodyMedium)
                                 }
+                                Slider(
+                                    value = (viewModel.einkRefreshDurationMillis / 100).toFloat(),
+                                    onValueChange = { viewModel.updateEinkRefreshDurationMillis((it * 100).roundToInt()) },
+                                    valueRange = 1f..15f,
+                                    steps = 14,
+                                )
+                            }
 
-                                // Delay
-                                Column {
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.SpaceBetween,
-                                    ) {
-                                        Text("Delay", style = MaterialTheme.typography.bodyMedium)
-                                        Text("${viewModel.einkRefreshDelayMillis} ms", style = MaterialTheme.typography.bodyMedium)
-                                    }
-                                    Slider(
-                                        value = (viewModel.einkRefreshDelayMillis / 100).toFloat(),
-                                        onValueChange = { viewModel.updateEinkRefreshDelayMillis((it * 100).roundToInt()) },
-                                        valueRange = 0f..10f,
-                                        steps = 10,
-                                    )
+                            // Delay
+                            Column {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                ) {
+                                    Text("Delay", style = MaterialTheme.typography.bodyMedium)
+                                    Text("${viewModel.einkRefreshDelayMillis} ms", style = MaterialTheme.typography.bodyMedium)
                                 }
+                                Slider(
+                                    value = (viewModel.einkRefreshDelayMillis / 100).toFloat(),
+                                    onValueChange = { viewModel.updateEinkRefreshDelayMillis((it * 100).roundToInt()) },
+                                    valueRange = 0f..10f,
+                                    steps = 10,
+                                )
+                            }
 
                             // Interval
                             Column {
@@ -898,7 +898,9 @@ private fun ReaderThemeSwatchButton(
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                         showMenu = true
                     }
-                } else null,
+                } else {
+                    null
+                },
             ),
         shape = RoundedCornerShape(8.dp),
         color = if (selected) {

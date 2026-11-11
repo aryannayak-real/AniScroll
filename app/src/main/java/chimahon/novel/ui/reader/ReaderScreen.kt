@@ -1,3 +1,5 @@
+@file:Suppress("ktlint:standard:no-wildcard-imports")
+
 package chimahon.novel.ui.reader
 
 import android.graphics.Bitmap
@@ -49,7 +51,9 @@ private sealed interface ReaderLoadState {
 }
 
 enum class ActiveSheet {
-    Appearance, Chapters, Statistics
+    Appearance,
+    Chapters,
+    Statistics,
 }
 
 @Composable
@@ -98,11 +102,17 @@ fun ReaderScreen(
             chimahon.novel.data.Theme.SYSTEM -> {
                 val isDark = (context.resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK) == android.content.res.Configuration.UI_MODE_NIGHT_YES
                 if (isDark) {
-                    if (systemLightSepia) 0xFF1C140C.toInt() to 0xFFF2E2C9.toInt()
-                    else 0xFF121212.toInt() to 0xFFE0E0E0.toInt()
+                    if (systemLightSepia) {
+                        0xFF1C140C.toInt() to 0xFFF2E2C9.toInt()
+                    } else {
+                        0xFF121212.toInt() to 0xFFE0E0E0.toInt()
+                    }
                 } else {
-                    if (systemLightSepia) 0xFFF2E2C9.toInt() to 0xFF3C2C1C.toInt()
-                    else 0xFFFFFFFF.toInt() to 0xFF000000.toInt()
+                    if (systemLightSepia) {
+                        0xFFF2E2C9.toInt() to 0xFF3C2C1C.toInt()
+                    } else {
+                        0xFFFFFFFF.toInt() to 0xFF000000.toInt()
+                    }
                 }
             }
         }
@@ -280,7 +290,7 @@ fun ReaderScreen(
     BoxWithConstraints(
         modifier = Modifier
             .fillMaxSize()
-            .background(bgColor)
+            .background(bgColor),
     ) {
         Log.d("ReaderScreen", "BoxWithConstraints: maxHeight=$maxHeight, maxWidth=$maxWidth")
 
@@ -433,7 +443,7 @@ fun ReaderScreen(
                 visible = showHud,
                 enter = slideInVertically(initialOffsetY = { -it }) + fadeIn(),
                 exit = slideOutVertically(targetOffsetY = { -it }) + fadeOut(),
-                modifier = Modifier.align(Alignment.TopCenter)
+                modifier = Modifier.align(Alignment.TopCenter),
             ) {
                 ReaderTopBar(
                     title = readyVm.document.title().orEmpty(),
@@ -442,7 +452,7 @@ fun ReaderScreen(
                     backgroundColor = currentSettings.backgroundColor,
                     contentColor = currentSettings.textColor,
                     modifier = Modifier
-                        .statusBarsPadding()
+                        .statusBarsPadding(),
                 )
             }
 
@@ -453,7 +463,7 @@ fun ReaderScreen(
                 exit = slideOutVertically(targetOffsetY = { it }) + fadeOut(),
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .windowInsetsPadding(WindowInsets.navigationBars)
+                    .windowInsetsPadding(WindowInsets.navigationBars),
             ) {
                 ReaderBottomBar(
                     focusMode = focusMode,
@@ -533,12 +543,12 @@ private fun ReaderTopBar(
     onToggleHud: () -> Unit,
     backgroundColor: Int,
     contentColor: Int,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     TopAppBar(
         modifier = modifier.clickable(
             interactionSource = remember { MutableInteractionSource() },
-            indication = null
+            indication = null,
         ) { onToggleHud() },
         title = {
             Text(
@@ -546,7 +556,7 @@ private fun ReaderTopBar(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 style = MaterialTheme.typography.titleMedium,
-                color = Color(contentColor)
+                color = Color(contentColor),
             )
         },
         navigationIcon = {
@@ -554,13 +564,13 @@ private fun ReaderTopBar(
                 Icon(
                     Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "Back",
-                    tint = Color(contentColor)
+                    tint = Color(contentColor),
                 )
             }
         },
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = Color(backgroundColor).copy(alpha = 0.9f)
-        )
+            containerColor = Color(backgroundColor).copy(alpha = 0.9f),
+        ),
     )
 }
 
@@ -575,7 +585,7 @@ private fun ReaderBottomBar(
     onOpenChapters: () -> Unit,
     onOpenAppearance: () -> Unit,
     onOpenStatistics: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Row(
         modifier = modifier
@@ -583,16 +593,16 @@ private fun ReaderBottomBar(
             .background(Color(backgroundColor).copy(alpha = 0.9f))
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
-                indication = null
+                indication = null,
             ) { onToggleHud() }
             .padding(horizontal = 16.dp, vertical = 12.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
             text = progressText,
             style = MaterialTheme.typography.bodyMedium,
-            color = Color(contentColor).copy(alpha = 0.7f)
+            color = Color(contentColor).copy(alpha = 0.7f),
         )
 
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -600,21 +610,21 @@ private fun ReaderBottomBar(
                 Icon(
                     Icons.AutoMirrored.Filled.List,
                     contentDescription = "Chapters",
-                    tint = Color(contentColor)
+                    tint = Color(contentColor),
                 )
             }
             IconButton(onClick = onOpenAppearance) {
                 Icon(
                     Icons.Default.Settings,
                     contentDescription = "Appearance",
-                    tint = Color(contentColor)
+                    tint = Color(contentColor),
                 )
             }
             IconButton(onClick = onOpenStatistics) {
                 Icon(
                     Icons.Outlined.QueryStats,
                     contentDescription = "Statistics",
-                    tint = Color(contentColor)
+                    tint = Color(contentColor),
                 )
             }
         }
@@ -625,12 +635,12 @@ private fun ReaderBottomBar(
 private fun ReaderMessage(
     text: String,
     modifier: Modifier = Modifier,
-    loading: Boolean = false
+    loading: Boolean = false,
 ) {
     Column(
         modifier = modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         if (loading) CircularProgressIndicator()
         Spacer(modifier = Modifier.padding(8.dp))
@@ -641,7 +651,7 @@ private fun ReaderMessage(
 @Composable
 private fun ReaderThemedArea(
     readerSettings: ReaderSettings,
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
     val bgColor = Color(readerSettings.backgroundColor)
     val textColor = Color(readerSettings.textColor)
@@ -669,7 +679,7 @@ private fun ReaderThemedArea(
         outlineVariant = textColor.copy(alpha = 0.2f),
         surfaceContainer = bgColor,
         surfaceContainerHigh = bgColor,
-        surfaceContainerHighest = bgColor
+        surfaceContainerHighest = bgColor,
     )
 
     MaterialTheme(colorScheme = colorScheme, content = content)

@@ -10,8 +10,8 @@ import eu.kanade.domain.extension.interactor.TrustExtension
 import eu.kanade.domain.source.service.SourcePreferences
 import eu.kanade.tachiyomi.extension.model.Extension
 import eu.kanade.tachiyomi.extension.model.LoadResult
-import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.CatalogueSource
+import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceFactory
 import eu.kanade.tachiyomi.sourcenovel.NovelSource
 import eu.kanade.tachiyomi.util.lang.Hash
@@ -274,10 +274,11 @@ internal object ExtensionLoader {
         val extName = when (contentType) {
             Extension.ContentType.MANGA -> appInfo.metaData.getString(METADATA_NAME)
                 ?: pkgManager.getApplicationLabel(appInfo).toString().substringAfter("Tachiyomi: ")
-            Extension.ContentType.NOVEL -> appInfo.metaData
-                ?.getString("source.name")
-                ?.takeIf { it.isNotBlank() }
-                ?: pkgManager.getApplicationLabel(appInfo).toString().substringAfter("IReader: ").substringBefore(" (")
+            Extension.ContentType.NOVEL ->
+                appInfo.metaData
+                    ?.getString("source.name")
+                    ?.takeIf { it.isNotBlank() }
+                    ?: pkgManager.getApplicationLabel(appInfo).toString().substringAfter("IReader: ").substringBefore(" (")
         }
         val versionName = pkgInfo.versionName
         val versionCode = PackageInfoCompat.getLongVersionCode(pkgInfo)

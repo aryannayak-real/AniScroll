@@ -1,6 +1,7 @@
 package chimahon.novel.opds
 
 import eu.kanade.tachiyomi.network.NetworkHelper
+import eu.kanade.tachiyomi.network.awaitSuccess
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.coroutineScope
@@ -13,7 +14,6 @@ import okhttp3.Response
 import okhttp3.logging.HttpLoggingInterceptor
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
-import eu.kanade.tachiyomi.network.awaitSuccess
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
 
@@ -28,7 +28,11 @@ internal object OpdsNetwork {
 
     suspend fun <T> read(call: Call, block: suspend (Response) -> T): T = coroutineScope {
         val cancellation = launch(start = CoroutineStart.UNDISPATCHED) {
-            try { awaitCancellation() } finally { call.cancel() }
+            try {
+                awaitCancellation()
+            } finally {
+                call.cancel()
+            }
         }
         try {
             call.awaitSuccess().use { block(it) }

@@ -13,14 +13,14 @@ import androidx.core.view.isVisible
 import chimahon.DictionaryRepository
 import chimahon.MediaInfo
 import eu.kanade.presentation.util.formattedMessage
-import eu.kanade.tachiyomi.databinding.ReaderErrorBinding
 import eu.kanade.tachiyomi.data.panel.PanelModelDownloader
+import eu.kanade.tachiyomi.databinding.ReaderErrorBinding
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.reader.model.InsertPage
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.viewer.OcrCoordinateMapper
-import eu.kanade.tachiyomi.ui.reader.viewer.OcrTextBlock
 import eu.kanade.tachiyomi.ui.reader.viewer.OcrPageRegion
+import eu.kanade.tachiyomi.ui.reader.viewer.OcrTextBlock
 import eu.kanade.tachiyomi.ui.reader.viewer.ReaderPageImageView
 import eu.kanade.tachiyomi.ui.reader.viewer.ReaderProgressIndicator
 import eu.kanade.tachiyomi.ui.webview.WebViewActivity
@@ -277,7 +277,9 @@ class PagerPageHolder(
 
                         val cropRect = if (!isAnimated && viewer.config.imageCropBorders) {
                             OcrCoordinateMapper.detectCropRect(itemSource)
-                        } else null
+                        } else {
+                            null
+                        }
                         pageCropRect = cropRect
 
                         val panelBitmap = if (!isAnimated && viewer.config.panelNavigation) {
@@ -913,9 +915,9 @@ class PagerPageHolder(
                 }
                 if (isSplitPage) {
                     val keepLeft = when {
-                        viewer is L2RPagerViewer && page is InsertPage -> false  // InsertPage = right half in L2R
-                        viewer !is L2RPagerViewer && page is InsertPage -> true  // InsertPage = left half in R2L
-                        viewer is L2RPagerViewer && page !is InsertPage -> true  // Original = left half in L2R
+                        viewer is L2RPagerViewer && page is InsertPage -> false // InsertPage = right half in L2R
+                        viewer !is L2RPagerViewer && page is InsertPage -> true // InsertPage = left half in R2L
+                        viewer is L2RPagerViewer && page !is InsertPage -> true // Original = left half in L2R
                         else -> false
                     }.let { side -> if (viewer.config.dualPageInvert) !side else side }
 

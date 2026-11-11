@@ -3,8 +3,8 @@ package chimahon.novel.opds
 import android.text.InputType
 import android.widget.EditText
 import android.widget.LinearLayout
-import android.widget.TextView
 import android.widget.ScrollView
+import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.preference.Preference
 import androidx.preference.PreferenceCategory
@@ -17,33 +17,45 @@ internal object OpdsSettings {
     fun populate(screen: PreferenceScreen, store: OpdsStore) {
         val context = screen.context
         screen.removeAll()
-        screen.addPreference(Preference(context).apply {
-            title = context.getString(R.string.opds_add_catalog)
-            setOnPreferenceClickListener {
-                edit(screen, store, null)
-                true
-            }
-        })
+        screen.addPreference(
+            Preference(context).apply {
+                title = context.getString(R.string.opds_add_catalog)
+                setOnPreferenceClickListener {
+                    edit(screen, store, null)
+                    true
+                }
+            },
+        )
         store.catalogs().forEach { catalog ->
             val group = PreferenceCategory(context).apply { title = catalog.name }
             screen.addPreference(group)
-            group.addPreference(Preference(context).apply {
-                title = context.getString(R.string.opds_catalog_url)
-                // Feed URLs may include an auth key. Only show the server host.
-                summary = catalog.url.toHttpUrlOrNull()?.host
-                setOnPreferenceClickListener { edit(screen, store, catalog); true }
-            })
-            group.addPreference(Preference(context).apply {
-                title = context.getString(R.string.opds_remove_catalog)
-                summary = context.getString(R.string.opds_remove_catalog_summary)
-                setOnPreferenceClickListener {
-                    AlertDialog.Builder(context).setTitle(title).setMessage(summary)
-                        .setNegativeButton(android.R.string.cancel, null)
-                        .setPositiveButton(android.R.string.ok) { _, _ -> store.remove(catalog.id); populate(screen, store) }
-                        .show()
-                    true
-                }
-            })
+            group.addPreference(
+                Preference(context).apply {
+                    title = context.getString(R.string.opds_catalog_url)
+                    // Feed URLs may include an auth key. Only show the server host.
+                    summary = catalog.url.toHttpUrlOrNull()?.host
+                    setOnPreferenceClickListener {
+                        edit(screen, store, catalog)
+                        true
+                    }
+                },
+            )
+            group.addPreference(
+                Preference(context).apply {
+                    title = context.getString(R.string.opds_remove_catalog)
+                    summary = context.getString(R.string.opds_remove_catalog_summary)
+                    setOnPreferenceClickListener {
+                        AlertDialog.Builder(context).setTitle(title).setMessage(summary)
+                            .setNegativeButton(android.R.string.cancel, null)
+                            .setPositiveButton(android.R.string.ok) { _, _ ->
+                                store.remove(catalog.id)
+                                populate(screen, store)
+                            }
+                            .show()
+                        true
+                    }
+                },
+            )
         }
     }
 
@@ -54,10 +66,12 @@ internal object OpdsSettings {
             orientation = LinearLayout.VERTICAL
             setPadding(padding, 0, padding, 0)
         }
-        layout.addView(TextView(context).apply {
-            text = context.getString(R.string.opds_kavita_setup_help)
-            setPadding(0, padding / 2, 0, padding / 2)
-        })
+        layout.addView(
+            TextView(context).apply {
+                text = context.getString(R.string.opds_kavita_setup_help)
+                setPadding(0, padding / 2, 0, padding / 2)
+            },
+        )
         fun field(label: Int, value: String, input: Int = InputType.TYPE_CLASS_TEXT) = EditText(context).apply {
             hint = context.getString(label)
             inputType = input
@@ -77,13 +91,15 @@ internal object OpdsSettings {
                 if (parsed == null || name.text.isBlank()) {
                     url.error = context.getString(R.string.opds_invalid_url)
                 } else {
-                    store.save(OpdsCatalog(
-                        id = catalog?.id ?: UUID.randomUUID().toString(),
-                        name = name.text.toString().trim(),
-                        url = parsed.toString(),
-                        username = username.text.toString(),
-                        password = password.text.toString(),
-                    ))
+                    store.save(
+                        OpdsCatalog(
+                            id = catalog?.id ?: UUID.randomUUID().toString(),
+                            name = name.text.toString().trim(),
+                            url = parsed.toString(),
+                            username = username.text.toString(),
+                            password = password.text.toString(),
+                        ),
+                    )
                     populate(screen, store)
                     dialog.dismiss()
                 }

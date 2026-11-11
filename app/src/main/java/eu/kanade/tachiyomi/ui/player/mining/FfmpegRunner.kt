@@ -58,7 +58,7 @@ internal object FfmpegRunner {
                 if (ReturnCode.isSuccess(session.getReturnCode())) {
                     FfmpegCommandResult.Success(ffmpegOutput(session))
                 } else {
-                    failed(session.getReturnCode(), session.getFailStackTrace(), session.getAllLogsAsString(failureLogWaitMillis))
+                    failed(session.getReturnCode(), session.getFailStackTrace(), session.getAllLogsAsString(FAILURE_LOG_WAIT_MILLIS))
                 }
             },
             onNativeFinished = onNativeFinished,
@@ -73,7 +73,7 @@ internal object FfmpegRunner {
                 if (ReturnCode.isSuccess(session.getReturnCode())) {
                     FfmpegCommandResult.Success(session.getOutput()?.trim() ?: "")
                 } else {
-                    failed(session.getReturnCode(), session.getFailStackTrace(), session.getAllLogsAsString(failureLogWaitMillis))
+                    failed(session.getReturnCode(), session.getFailStackTrace(), session.getAllLogsAsString(FAILURE_LOG_WAIT_MILLIS))
                 }
             },
             onNativeFinished = onNativeFinished,
@@ -99,10 +99,17 @@ internal object FfmpegRunner {
     ): FfmpegCommandResult = suspendCancellableCoroutine { cont ->
         val started = AtomicBoolean(false)
         val nativeDone = AtomicBoolean(false)
-        fun nativeFinished() { if (nativeDone.compareAndSet(false, true)) runCatching(onNativeFinished) }
+        fun nativeFinished() {
+            if (nativeDone.compareAndSet(false, true)) runCatching(onNativeFinished)
+        }
 
-        val session = try { createSession() } catch (_: Exception) {
-            started.set(true); nativeFinished(); cont.resume(FfmpegCommandResult.Failed); return@suspendCancellableCoroutine
+        val session = try {
+            createSession()
+        } catch (_: Exception) {
+            started.set(true)
+            nativeFinished()
+            cont.resume(FfmpegCommandResult.Failed)
+            return@suspendCancellableCoroutine
         }
 
         cont.invokeOnCancellation {
@@ -110,28 +117,31 @@ internal object FfmpegRunner {
         }
 
         try {
-            Dispatchers.IO.dispatch(cont.context, Runnable {
-                if (!started.compareAndSet(false, true)) {
-                    nativeFinished()
-                } else {
-                    val result = try {
-                        runSession(session)
-                        runCatching { resultFor(session) }.getOrDefault(FfmpegCommandResult.Failed)
-                    } catch (_: Exception) {
-                        FfmpegCommandResult.Failed
-                    } finally {
+            Dispatchers.IO.dispatch(
+                cont.context,
+                Runnable {
+                    if (!started.compareAndSet(false, true)) {
                         nativeFinished()
+                    } else {
+                        val result = try {
+                            runSession(session)
+                            runCatching { resultFor(session) }.getOrDefault(FfmpegCommandResult.Failed)
+                        } catch (_: Exception) {
+                            FfmpegCommandResult.Failed
+                        } finally {
+                            nativeFinished()
+                        }
+                        if (cont.isActive) cont.resume(result)
                     }
-                    if (cont.isActive) cont.resume(result)
-                }
-            })
+                },
+            )
         } catch (_: Exception) {
             if (!started.compareAndSet(false, true)) runCatching { cancelSession(session) }
             nativeFinished()
             if (cont.isActive) cont.resume(FfmpegCommandResult.Failed)
         }
     }
-    private const val failureLogWaitMillis = 1_000
+    private const val FAILURE_LOG_WAIT_MILLIS = 1_000
     private val discardLogCallback = LogCallback {}
     private val discardStatisticsCallback = StatisticsCallback {}
 }

@@ -77,9 +77,12 @@ class NovelExtensionDetailsScreenModel(
         screenModelScope.launch {
             if (pkgName == chimahon.novel.opds.OpdsSource.PACKAGE_NAME) {
                 _state.value = State(
-                    name = "OPDS", version = "1.0", lang = "all",
+                    name = "OPDS",
+                    version = "1.0",
+                    lang = "all",
                     iconUrl = "android.resource://${Injekt.get<android.content.Context>().packageName}/${eu.kanade.tachiyomi.R.drawable.ic_opds}",
-                    sourceId = chimahon.novel.opds.OpdsSource.ID, isBuiltIn = true,
+                    sourceId = chimahon.novel.opds.OpdsSource.ID,
+                    isBuiltIn = true,
                 )
             } else if (pkgName.startsWith("js.")) {
                 val id = pkgName.removePrefix("js.")

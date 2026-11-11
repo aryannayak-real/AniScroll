@@ -155,6 +155,7 @@ internal inline fun novelRequire(value: Boolean, code: NovelFailure.Code, vararg
 fun Context.novelFailureMessage(error: Throwable, @StringRes fallback: Int): String {
     val failure = generateSequence(error) { it.cause }.mapNotNull { it as? NovelFailureCarrier }.firstOrNull()
         ?: return error.localizedMessage?.takeIf(String::isNotBlank) ?: getString(fallback)
+
     @StringRes val resource =
         when (failure.code) {
             NovelFailure.Code.ImportPlanInvalid -> R.string.novel_failure_import_plan_invalid
@@ -281,5 +282,3 @@ fun Context.novelFailureMessage(error: Throwable, @StringRes fallback: Int): Str
         }
     return getString(resource, *arguments.toTypedArray())
 }
-
-

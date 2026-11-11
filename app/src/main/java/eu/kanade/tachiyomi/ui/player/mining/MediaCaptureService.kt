@@ -78,13 +78,17 @@ internal class MediaCaptureService(
 
     private fun MutableList<String>.addInputOptions(source: FfmpegSource) {
         if (source.headers.isNotEmpty()) {
-            add("-headers"); add(source.headers.joinToString("") { "${it.first}: ${it.second}\r\n" })
+            add("-headers")
+            add(source.headers.joinToString("") { "${it.first}: ${it.second}\r\n" })
         }
         // HLS-only (see isHlsLikeInput): ffmpeg aborts other inputs if these are present.
         if (isHlsLikeInput(source.input)) {
-            add("-allowed_extensions"); add("ALL")
-            add("-allowed_segment_extensions"); add("ALL")
-            add("-extension_picky"); add("0")
+            add("-allowed_extensions")
+            add("ALL")
+            add("-allowed_segment_extensions")
+            add("ALL")
+            add("-extension_picky")
+            add("0")
         }
     }
 
@@ -97,13 +101,20 @@ internal class MediaCaptureService(
                 frameFile.delete()
                 val args = buildList {
                     addInputOptions(source)
-                    add("-ss"); add(seconds.coerceAtLeast(0.0).formatSeconds())
-                    add("-i"); add(source.input)
-                    add("-frames:v"); add("1")
-                    add("-f"); add("image2")
-                    add("-c:v"); add("mjpeg")
-                    add("-q:v"); add("4")
-                    add("-y"); add(frameFile.absolutePath)
+                    add("-ss")
+                    add(seconds.coerceAtLeast(0.0).formatSeconds())
+                    add("-i")
+                    add(source.input)
+                    add("-frames:v")
+                    add("1")
+                    add("-f")
+                    add("image2")
+                    add("-c:v")
+                    add("mjpeg")
+                    add("-q:v")
+                    add("4")
+                    add("-y")
+                    add(frameFile.absolutePath)
                 }.toTypedArray()
                 val result = FfmpegRunner.ffmpeg(args)
                 if (result !is FfmpegCommandResult.Success || !frameFile.isFile || frameFile.length() <= 0L) {
@@ -194,23 +205,34 @@ internal class MediaCaptureService(
                 val duration = (end - start).coerceIn(0.25, 10.0)
                 val args = buildList {
                     addInputOptions(source)
-                    add("-ss"); add(start.coerceAtLeast(0.0).formatSeconds())
-                    add("-t"); add(duration.formatSeconds())
-                    add("-i"); add(source.input)
+                    add("-ss")
+                    add(start.coerceAtLeast(0.0).formatSeconds())
+                    add("-t")
+                    add(duration.formatSeconds())
+                    add("-i")
+                    add(source.input)
                     add("-an")
                     add("-sn")
                     add("-dn")
-                    add("-map"); add("0:v:0")
-                    add("-vf"); add(
+                    add("-map")
+                    add("0:v:0")
+                    add("-vf")
+                    add(
                         "scale=w=640:h=640:force_original_aspect_ratio=decrease," +
                             "crop=trunc(iw/2)*2:trunc(ih/2)*2,setsar=1,fps=8,format=yuv420p",
                     )
-                    add("-frames:v"); add("80")
-                    add("-c:v"); add("libsvtav1")
-                    add("-preset"); add("8")
-                    add("-crf"); add("35")
-                    add("-strict"); add("-2")
-                    add("-f"); add("avif")
+                    add("-frames:v")
+                    add("80")
+                    add("-c:v")
+                    add("libsvtav1")
+                    add("-preset")
+                    add("8")
+                    add("-crf")
+                    add("35")
+                    add("-strict")
+                    add("-2")
+                    add("-f")
+                    add("avif")
                     add(avifFile.absolutePath)
                     add("-y")
                 }.toTypedArray()

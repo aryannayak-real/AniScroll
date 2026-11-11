@@ -6,12 +6,12 @@ import android.util.Log
 import chimahon.dictionary.DICTIONARY_TYPES_MARKER
 import chimahon.dictionary.DictionaryCommitter
 import chimahon.dictionary.DictionaryType
+import chimahon.dictionary.ko.KoreanAnalyzerDeinflector
+import chimahon.dictionary.ko.KoreanParserMode
 import chimahon.dictionary.probeDictionaryTypes
 import chimahon.dictionary.readDictionaryTypes
 import chimahon.dictionary.touchDictionariesDir
 import chimahon.dictionary.writeDictionaryTypes
-import chimahon.dictionary.ko.KoreanAnalyzerDeinflector
-import chimahon.dictionary.ko.KoreanParserMode
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
@@ -21,7 +21,7 @@ import java.util.LinkedHashMap
 
 class DictionaryRepository(
     private val externalFilesDir: File?,
-    private val koreanParserMode: () -> String = { KoreanParserMode.Legacy },
+    private val koreanParserMode: () -> String = { KoreanParserMode.LEGACY },
 ) {
     private var session: Long? = null
     val lookupSession: Long? get() = session
@@ -29,8 +29,6 @@ class DictionaryRepository(
     private var cachedStyles: List<DictionaryStyle> = emptyList()
     /** ID of the profile that was last used to call [warmUp].  Prevents redundant engine rebuilds. */
     private var lastWarmedProfileId: String = ""
-
-
 
     /**
      * Warm up the query engine for [paths].
@@ -72,7 +70,7 @@ class DictionaryRepository(
 
         val effectiveLang = languageCode.lowercase()
 
-        val genericDeinflector = if (effectiveLang == "ko" && koreanParserMode() == KoreanParserMode.Analyzer) {
+        val genericDeinflector = if (effectiveLang == "ko" && koreanParserMode() == KoreanParserMode.ANALYZER) {
             KoreanAnalyzerDeinflector
         } else {
             chimahon.dictionary.DeinflectorRegistry.get(effectiveLang)
@@ -123,7 +121,7 @@ class DictionaryRepository(
         return LookupResult2(
             results = results,
             styles = cachedStyles,
-            mediaDataUris = emptyMap(),  // Empty on critical path
+            mediaDataUris = emptyMap(), // Empty on critical path
             error = null,
         )
     }

@@ -91,7 +91,8 @@ object BookImporter {
             // EPUB at read time.
             if (targetRootUni != null) {
                 val uniDir = chimahon.novel.source.LocalNovelFiles.uniqueTitleDirUni(
-                    targetRootUni, title,
+                    targetRootUni,
+                    title,
                 ) ?: return@withContext ImportResult(error = "Could not create book folder")
                 // Reimports replace files (DB carries resume/history/stats).
                 runCatching { uniDir.listFiles() }.getOrNull()
@@ -274,10 +275,17 @@ object BookImporter {
                 if (committed) backup.deleteRecursively()
             }
         }
-        return ImportResult(metadata = BookMetadata(
-            id = id, title = title, author = author, folder = id,
-            hash = id, lang = language, categoryIds = categories,
-        ))
+        return ImportResult(
+            metadata = BookMetadata(
+                id = id,
+                title = title,
+                author = author,
+                folder = id,
+                hash = id,
+                lang = language,
+                categoryIds = categories,
+            ),
+        )
     }
 
     /**

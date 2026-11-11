@@ -20,9 +20,9 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.core.stack.StackEvent
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import eu.kanade.presentation.browse.anime.AnimeFeedActionsDialog
 import eu.kanade.presentation.browse.anime.AnimeFeedAddDialog
 import eu.kanade.presentation.browse.anime.AnimeFeedAddSearchDialog
-import eu.kanade.presentation.browse.anime.AnimeFeedActionsDialog
 import eu.kanade.presentation.browse.anime.AnimeFeedOrderScreen
 import eu.kanade.presentation.browse.anime.AnimeFeedScreen
 import eu.kanade.presentation.browse.anime.components.AnimeBulkFavoriteDialogs
@@ -34,10 +34,10 @@ import eu.kanade.tachiyomi.ui.browse.BulkFavoriteAnimeScreenModel
 import eu.kanade.tachiyomi.ui.browse.animesource.browse.BrowseAnimeSourceScreen
 import eu.kanade.tachiyomi.ui.entries.anime.AnimeScreen
 import eu.kanade.tachiyomi.ui.home.HomeScreen
-import tachiyomi.domain.source.anime.interactor.GetRemoteAnime
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import tachiyomi.domain.source.anime.interactor.GetRemoteAnime
 import tachiyomi.i18n.MR
 import tachiyomi.i18n.kmk.KMR
 import tachiyomi.i18n.sy.SYMR

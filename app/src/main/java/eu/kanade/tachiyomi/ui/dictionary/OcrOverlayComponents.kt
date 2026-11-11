@@ -291,7 +291,8 @@ fun OcrTapHint(
 }
 
 fun cropBitmap(bitmap: Bitmap, left: Float, top: Float, right: Float, bottom: Float): Bitmap {
-    val w = bitmap.width; val h = bitmap.height
+    val w = bitmap.width
+    val h = bitmap.height
     val x = (left * w).toInt().coerceIn(0, w)
     val y = (top * h).toInt().coerceIn(0, h)
     val r = (right * w).toInt().coerceIn(x + 1, w)
@@ -301,12 +302,16 @@ fun cropBitmap(bitmap: Bitmap, left: Float, top: Float, right: Float, bottom: Fl
 
 fun cropAroundAnchor(
     bitmap: Bitmap,
-    anchorX: Float, anchorY: Float,
-    anchorWidth: Float, anchorHeight: Float,
-    aspectX: Int, aspectY: Int,
+    anchorX: Float,
+    anchorY: Float,
+    anchorWidth: Float,
+    anchorHeight: Float,
+    aspectX: Int,
+    aspectY: Int,
     paddingFactor: Float = 1.5f,
 ): Bitmap {
-    val bw = bitmap.width.toFloat(); val bh = bitmap.height.toFloat()
+    val bw = bitmap.width.toFloat()
+    val bh = bitmap.height.toFloat()
     val cx = ((anchorX + anchorWidth / 2f) / bw).coerceIn(0f, 1f)
     val cy = ((anchorY + anchorHeight / 2f) / bh).coerceIn(0f, 1f)
     val textW = (anchorWidth / bw * paddingFactor).coerceAtLeast(0.01f)
@@ -315,22 +320,27 @@ fun cropAroundAnchor(
     // PIXEL dimensions match aspectX:aspectY regardless of bitmap orientation.
     val pixelRatio = if (aspectY > 0) aspectX.toFloat() / aspectY.toFloat() else 1f
     val normRatio = pixelRatio * bh / bw
-    var cropW: Float; var cropH: Float
+    var cropW: Float
+    var cropH: Float
     if (textW / textH > normRatio) {
-        cropH = textH; cropW = textH * normRatio
+        cropH = textH
+        cropW = textH * normRatio
     } else {
-        cropW = textW; cropH = textW / normRatio
+        cropW = textW
+        cropH = textW / normRatio
     }
     // Sensible size bounds while preserving ratio
     val minSize = 0.20f
     val maxSize = 0.80f
     if (cropW < minSize || cropH < minSize) {
         val scale = minSize / minOf(cropW, cropH).coerceAtLeast(0.001f)
-        cropW *= scale; cropH *= scale
+        cropW *= scale
+        cropH *= scale
     }
     if (cropW > maxSize || cropH > maxSize) {
         val scale = maxSize / maxOf(cropW, cropH)
-        cropW *= scale; cropH *= scale
+        cropW *= scale
+        cropH *= scale
     }
     // Edge clamp preserving ratio (joint, not independent)
     val maxHalfW = minOf(cx, 1f - cx)

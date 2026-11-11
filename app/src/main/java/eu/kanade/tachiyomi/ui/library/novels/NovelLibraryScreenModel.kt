@@ -10,19 +10,11 @@ import chimahon.novel.data.BookImporter
 import chimahon.novel.data.BookMetadata
 import chimahon.novel.data.BookStorage
 import chimahon.novel.data.NovelCategory
-import eu.kanade.presentation.library.components.LibraryToolbarTitle
-import eu.kanade.tachiyomi.util.system.toast
-import tachiyomi.domain.novel.model.Novel
-import tachiyomi.domain.novel.model.NovelCategory as DbNovelCategory
-import tachiyomi.domain.novel.model.NovelUpdate
-import tachiyomi.domain.novel.repository.NovelChapterRepository
-import tachiyomi.domain.novel.repository.NovelCategoryRepository
-import tachiyomi.domain.novel.repository.NovelHistoryRepository
-import tachiyomi.domain.novel.repository.NovelReadingStatsRepository
-import tachiyomi.domain.novel.repository.NovelRepository
 import chimahon.novel.interactor.MigrateNovelJsonData
 import chimahon.novel.interactor.RegisterLocalNovelHome
 import chimahon.novel.source.LocalNovelFiles
+import eu.kanade.presentation.library.components.LibraryToolbarTitle
+import eu.kanade.tachiyomi.util.system.toast
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
@@ -39,9 +31,17 @@ import tachiyomi.core.common.util.lang.launchNonCancellable
 import tachiyomi.domain.category.model.Category
 import tachiyomi.domain.library.model.LibraryDisplayMode
 import tachiyomi.domain.library.service.NovelLibraryPreferences
+import tachiyomi.domain.novel.model.Novel
+import tachiyomi.domain.novel.model.NovelUpdate
+import tachiyomi.domain.novel.repository.NovelCategoryRepository
+import tachiyomi.domain.novel.repository.NovelChapterRepository
+import tachiyomi.domain.novel.repository.NovelHistoryRepository
+import tachiyomi.domain.novel.repository.NovelReadingStatsRepository
+import tachiyomi.domain.novel.repository.NovelRepository
 import tachiyomi.i18n.MR
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import tachiyomi.domain.novel.model.NovelCategory as DbNovelCategory
 
 class NovelLibraryScreenModel(
     private val app: Application = Injekt.get(),
@@ -53,7 +53,7 @@ class NovelLibraryScreenModel(
     private val migrateNovelJsonData: MigrateNovelJsonData = Injekt.get(),
 ) : StateScreenModel<NovelLibraryScreenModel.State>(State()) {
 
-    private val _searchQuery = MutableStateFlow<String?>(null)
+    private val searchQuery = MutableStateFlow<String?>(null)
 
     init {
         screenModelScope.launch { migrateNovelJsonData.await() }
@@ -69,7 +69,7 @@ class NovelLibraryScreenModel(
         }
 
         screenModelScope.launch {
-            _searchQuery
+            searchQuery
                 .debounce(250)
                 .collect { query ->
                     mutableState.update { it.copy(searchQuery = query) }
@@ -128,7 +128,9 @@ class NovelLibraryScreenModel(
                     val chapters = novelChapterRepository.getChaptersByNovelId(novel.id)
                     novel.id to dm.getDownloadedCount(novel.id, chapters).toLong()
                 }
-            } catch (_: Exception) { emptyMap() }
+            } catch (_: Exception) {
+                emptyMap()
+            }
             // Empty local entries (folder without readable content): derived
             // per load, never stored. Readability is one shared check, so the
             // badge and the tap handler always agree.
@@ -202,7 +204,7 @@ class NovelLibraryScreenModel(
     }
 
     fun search(query: String?) {
-        _searchQuery.value = query
+        searchQuery.value = query
     }
 
     fun updateActiveCategoryIndex(index: Int) {
@@ -315,7 +317,9 @@ class NovelLibraryScreenModel(
                             }
                         }
                     }
-                } else errors++
+                } else {
+                    errors++
+                }
             }
             loadLibrary()
             mutableState.update { it.copy(isImporting = false, importResult = Pair(imported, errors)) }
@@ -444,7 +448,7 @@ class NovelLibraryScreenModel(
                             title = book.title,
                             author = book.author,
                             lang = book.lang,
-                        )
+                        ),
                     )
                 }
             }
@@ -468,7 +472,9 @@ class NovelLibraryScreenModel(
     }
 
     enum class SortMode {
-        Alphabetical, DateAdded, LastRead
+        Alphabetical,
+        DateAdded,
+        LastRead,
     }
 
     sealed interface Dialog {
@@ -520,7 +526,7 @@ class NovelLibraryScreenModel(
 
         val coercedActiveCategoryIndex: Int
             get() = activeCategoryIndex.coerceIn(0, (displayedCategories.size - 1).coerceAtLeast(0))
-        
+
         val activeCategory: NovelCategory?
             get() = displayedCategories.getOrNull(coercedActiveCategoryIndex)
 
@@ -636,13 +642,13 @@ class NovelLibraryScreenModel(
             return LibraryToolbarTitle(title, count)
         }
     }
-    
+
     fun setSort(mode: SortMode, descending: Boolean) {
         libraryPreferences.sortMode().set(mode.name)
         libraryPreferences.sortDescending().set(descending)
         mutableState.update { it.copy(sortMode = mode, sortDescending = descending) }
     }
-    
+
     fun showSortDialog() {
         mutableState.update { it.copy(dialog = Dialog.SortFilter) }
     }

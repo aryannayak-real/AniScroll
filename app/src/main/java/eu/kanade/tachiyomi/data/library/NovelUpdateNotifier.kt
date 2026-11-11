@@ -49,7 +49,8 @@ class NovelUpdateNotifier(
             .cancel(Notifications.ID_NOVEL_UPDATES_TO_EXTS)
     }
 
-    fun notifyNewChapters(novelTitlesWithCount: Map<String, Int>) {        if (novelTitlesWithCount.isEmpty()) return
+    fun notifyNewChapters(novelTitlesWithCount: Map<String, Int>) {
+        if (novelTitlesWithCount.isEmpty()) return
 
         val totalNew = novelTitlesWithCount.values.sum()
         context.notify(

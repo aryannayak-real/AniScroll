@@ -53,6 +53,8 @@ import eu.kanade.tachiyomi.animesource.AnimeSource
 import eu.kanade.tachiyomi.animesource.model.Hoster
 import eu.kanade.tachiyomi.animesource.model.Video
 import eu.kanade.tachiyomi.data.animedownload.AnimeDownloadManager
+import eu.kanade.tachiyomi.ui.main.MainActivity
+import eu.kanade.tachiyomi.ui.player.PlayerActivity
 import eu.kanade.tachiyomi.ui.player.controls.components.sheets.HosterState
 import eu.kanade.tachiyomi.ui.player.controls.components.sheets.QualitySheetHosterContent
 import eu.kanade.tachiyomi.ui.player.controls.components.sheets.QualitySheetVideoContent
@@ -60,7 +62,6 @@ import eu.kanade.tachiyomi.ui.player.controls.components.sheets.getChangedAt
 import eu.kanade.tachiyomi.ui.player.loader.EpisodeLoader
 import eu.kanade.tachiyomi.ui.player.loader.HosterLoader
 import eu.kanade.tachiyomi.util.system.toast
-import tachiyomi.core.common.i18n.stringResource
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -68,6 +69,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import logcat.LogPriority
+import tachiyomi.core.common.i18n.stringResource
 import tachiyomi.core.common.util.lang.launchIO
 import tachiyomi.core.common.util.lang.launchUI
 import tachiyomi.core.common.util.lang.withIOContext
@@ -86,8 +88,6 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.coroutines.cancellation.CancellationException
-import eu.kanade.tachiyomi.ui.main.MainActivity
-import eu.kanade.tachiyomi.ui.player.PlayerActivity
 
 class EpisodeOptionsDialogScreen(
     private val useExternalDownloader: Boolean,
@@ -158,8 +158,8 @@ class EpisodeOptionsDialogScreenModel(
     private val _anime = MutableStateFlow<Anime?>(null)
     val anime = _anime.asStateFlow()
 
-    private var _hosterList = emptyList<Hoster>()
-    private var _source: AnimeSource? = null
+    private var hosterList = emptyList<Hoster>()
+    private var source: AnimeSource? = null
 
     private val _showAllQualities = MutableStateFlow(false)
     val showAllQualities = _showAllQualities.asStateFlow()
@@ -174,7 +174,7 @@ class EpisodeOptionsDialogScreenModel(
 
             _episode.update { _ -> episode }
             _anime.update { _ -> anime }
-            _source = source
+            source = source
 
             val hosterListResult = withIOContext {
                 try {
@@ -190,7 +190,7 @@ class EpisodeOptionsDialogScreenModel(
             }
 
             val hosterList = hosterListResult.getOrThrow()
-            _hosterList = hosterList
+            hosterList = hosterList
             _hosterExpandedList.update { _ ->
                 List(hosterList.size) { true }
             }
@@ -341,8 +341,8 @@ class EpisodeOptionsDialogScreenModel(
 
                 screenModelScope.launchIO {
                     val newHosterState = EpisodeLoader.loadHosterVideos(
-                        _source!!,
-                        _hosterList[hosterIndex],
+                        source!!,
+                        hosterList[hosterIndex],
                     )
                     _hosterState.updateAt(hosterIndex, newHosterState)
                 }
@@ -358,7 +358,7 @@ class EpisodeOptionsDialogScreenModel(
             ?: return
 
         screenModelScope.launchIO {
-            val success = loadVideo(_source!!, video, hosterIndex, videoIndex)
+            val success = loadVideo(source!!, video, hosterIndex, videoIndex)
             if (success) {
                 _showAllQualities.update { _ -> false }
             }
@@ -367,7 +367,7 @@ class EpisodeOptionsDialogScreenModel(
 
     fun getHosterList(): List<Hoster>? {
         val hosterStateList = hosterState.value?.getOrNull() ?: return null
-        return _hosterList.mapIndexed { index, h ->
+        return hosterList.mapIndexed { index, h ->
             if (hosterStateList[index] is HosterState.Ready) {
                 Hoster(
                     hosterName = h.hosterName,

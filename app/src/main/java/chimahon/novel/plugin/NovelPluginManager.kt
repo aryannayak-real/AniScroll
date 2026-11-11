@@ -16,9 +16,9 @@ import kotlinx.serialization.json.Json
 import logcat.LogPriority
 import mihon.domain.extensionrepo.model.ExtensionRepo
 import mihon.domain.novelextensionrepo.repository.NovelExtensionRepoRepository
+import tachiyomi.core.common.util.system.logcat
 import tachiyomi.domain.novel.model.NovelInstalledPlugin
 import tachiyomi.domain.novel.repository.NovelPluginStoreRepository
-import tachiyomi.core.common.util.system.logcat
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -47,7 +47,11 @@ class NovelPluginManager(
 
     private fun loadInstalledRegistry(): List<InstalledNovelPlugin> {
         if (!registryFile.exists()) return emptyList()
-        return try { jsonCodec.decodeFromString<List<InstalledNovelPlugin>>(registryFile.readText()) } catch (_: Exception) { emptyList() }
+        return try {
+            jsonCodec.decodeFromString<List<InstalledNovelPlugin>>(registryFile.readText())
+        } catch (_: Exception) {
+            emptyList()
+        }
     }
 
     private suspend fun persistInstalledRegistry(installed: List<InstalledNovelPlugin>) {
@@ -125,7 +129,9 @@ class NovelPluginManager(
         if (!file.exists()) return emptyList()
         return try {
             jsonCodec.decodeFromString<CachedPluginIndex>(file.readText()).plugins
-        } catch (_: Exception) { emptyList() }
+        } catch (_: Exception) {
+            emptyList()
+        }
     }
 
     private fun saveCachedIndex(repoUrl: String, plugins: List<NovelPluginDescriptor>) {
@@ -141,11 +147,19 @@ class NovelPluginManager(
     }
 
     private fun loadAllCachedAvailable(): List<NovelPluginDescriptor> {
-        val files = try { indexCacheDir.listFiles() } catch (_: Exception) { null } ?: return emptyList()
+        val files = try {
+            indexCacheDir.listFiles()
+        } catch (_: Exception) {
+            null
+        } ?: return emptyList()
         return files
             .filter { it.isFile && it.name.startsWith("index-") && it.name.endsWith(".json") }
             .flatMap { file ->
-                try { jsonCodec.decodeFromString<CachedPluginIndex>(file.readText()).plugins } catch (_: Exception) { emptyList() }
+                try {
+                    jsonCodec.decodeFromString<CachedPluginIndex>(file.readText()).plugins
+                } catch (_: Exception) {
+                    emptyList()
+                }
             }
     }
 
@@ -246,7 +260,10 @@ class NovelPluginManager(
                 }
             }
             if (!body.isNullOrBlank() && successfulUrl != null) {
-                val json = kotlinx.serialization.json.Json { ignoreUnknownKeys = true; isLenient = true }
+                val json = kotlinx.serialization.json.Json {
+                    ignoreUnknownKeys = true
+                    isLenient = true
+                }
                 try {
                     val root = json.parseToJsonElement(body!!)
                     val pluginsArray: kotlinx.serialization.json.JsonArray? = when (root) {
@@ -359,7 +376,9 @@ class NovelPluginManager(
     }
 
     suspend fun uninstall(pluginId: String) = mutex.withLock {
-        try { java.io.File(pluginsDir, "$pluginId.js").delete() } catch (_: Exception) {}
+        try {
+            java.io.File(pluginsDir, "$pluginId.js").delete()
+        } catch (_: Exception) {}
         val filtered = _catalog.value.installed.filterNot { it.descriptor.id == pluginId }
         if (filtered.size != _catalog.value.installed.size) {
             _catalog.value = _catalog.value.copy(installed = filtered)
@@ -415,26 +434,26 @@ data class NovelPluginDescriptor(
  * Every filter screen and list must use this — never raw [NovelPluginDescriptor.lang].
  */
 fun normalizeNovelLanguage(lang: String): String {
-        val n = lang.trim().lowercase().filterNot { it.isISOControl() || it.category == CharCategory.FORMAT }
-        if (n.contains("english") || n == "en") return "en"
-        if (n.contains("chinese") || n.contains("中文") || n.contains("汉语") || n.contains("漢語") || n == "zh") return "zh"
-        if (n.contains("japanese") || n.contains("日本語") || n == "ja") return "ja"
-        if (n.contains("korean") || n.contains("한국어") || n == "ko") return "ko"
-        if (n.contains("arabic") || n.contains("العربية") || n == "ar") return "ar"
-        if (n.contains("french") || n.contains("français") || n == "fr") return "fr"
-        if (n.contains("spanish") || n.contains("español") || n == "es") return "es"
-        if (n.contains("portuguese") || n.contains("português") || n == "pt") return "pt"
-        if (n.contains("russian") || n.contains("русский") || n == "ru") return "ru"
-        if (n.contains("indonesian") || n == "id") return "id"
-        if (n.contains("turkish") || n.contains("türkçe") || n == "tr") return "tr"
-        if (n.contains("thai") || n.contains("ไทย") || n == "th") return "th"
-        if (n.contains("vietnamese") || n.contains("việt") || n == "vi") return "vi"
-        if (n.contains("polish") || n.contains("polski") || n == "pl") return "pl"
-        if (n.contains("ukrainian") || n.contains("українська") || n == "uk") return "uk"
-        if (n.contains("german") || n.contains("deutsch") || n == "de") return "de"
-        if (n.contains("italian") || n.contains("italiano") || n == "it") return "it"
-        if (n.contains("multi") || n == "all") return "all"
-        return n.takeIf { it.matches(Regex("[a-z]{2,3}")) } ?: "other"
+    val n = lang.trim().lowercase().filterNot { it.isISOControl() || it.category == CharCategory.FORMAT }
+    if (n.contains("english") || n == "en") return "en"
+    if (n.contains("chinese") || n.contains("中文") || n.contains("汉语") || n.contains("漢語") || n == "zh") return "zh"
+    if (n.contains("japanese") || n.contains("日本語") || n == "ja") return "ja"
+    if (n.contains("korean") || n.contains("한국어") || n == "ko") return "ko"
+    if (n.contains("arabic") || n.contains("العربية") || n == "ar") return "ar"
+    if (n.contains("french") || n.contains("français") || n == "fr") return "fr"
+    if (n.contains("spanish") || n.contains("español") || n == "es") return "es"
+    if (n.contains("portuguese") || n.contains("português") || n == "pt") return "pt"
+    if (n.contains("russian") || n.contains("русский") || n == "ru") return "ru"
+    if (n.contains("indonesian") || n == "id") return "id"
+    if (n.contains("turkish") || n.contains("türkçe") || n == "tr") return "tr"
+    if (n.contains("thai") || n.contains("ไทย") || n == "th") return "th"
+    if (n.contains("vietnamese") || n.contains("việt") || n == "vi") return "vi"
+    if (n.contains("polish") || n.contains("polski") || n == "pl") return "pl"
+    if (n.contains("ukrainian") || n.contains("українська") || n == "uk") return "uk"
+    if (n.contains("german") || n.contains("deutsch") || n == "de") return "de"
+    if (n.contains("italian") || n.contains("italiano") || n == "it") return "it"
+    if (n.contains("multi") || n == "all") return "all"
+    return n.takeIf { it.matches(Regex("[a-z]{2,3}")) } ?: "other"
 }
 
 private fun sha256Hex(input: String): String {
@@ -447,7 +466,8 @@ private fun sha256Hex(input: String): String {
     }
 }
 
-private fun parseVersion(v: String): List<Int> {    return v.trim().removePrefix("v").substringBefore('+').substringBefore('-')
+private fun parseVersion(v: String): List<Int> {
+    return v.trim().removePrefix("v").substringBefore('+').substringBefore('-')
         .split('.').map { it.takeWhile { c -> c.isDigit() }.toIntOrNull() ?: 0 }
 }
 

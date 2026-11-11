@@ -42,8 +42,14 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import tachiyomi.i18n.MR
 import eu.kanade.domain.ui.UiPreferences
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import tachiyomi.domain.history.interactor.DeleteSearchHistory
+import tachiyomi.domain.history.interactor.GetSearchHistory
+import tachiyomi.domain.history.interactor.UpsertSearchHistory
+import tachiyomi.domain.history.model.SearchHistory
+import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.material.padding
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.clearFocusOnSoftKeyboardHide
@@ -51,15 +57,8 @@ import tachiyomi.presentation.core.util.collectAsState
 import tachiyomi.presentation.core.util.isItemScrollingUp
 import tachiyomi.presentation.core.util.runOnEnterKeyPressed
 import tachiyomi.presentation.core.util.secondaryItemAlpha
-
-import tachiyomi.domain.history.interactor.DeleteSearchHistory
-import tachiyomi.domain.history.interactor.GetSearchHistory
-import tachiyomi.domain.history.interactor.UpsertSearchHistory
-import tachiyomi.domain.history.model.SearchHistory
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 @Composable
 fun AnimatedFloatingSearchBox(

@@ -54,9 +54,18 @@ fun OcrRegionSelector(
                 } else {
                     fun Offset.clamped() = Offset(x.coerceIn(0f, size.width.toFloat()), y.coerceIn(0f, size.height.toFloat()))
                     detectDragGestures(
-                        onDragStart = { start = it.clamped(); end = start },
-                        onDrag = { change, _ -> change.consume(); end = change.position.clamped() },
-                        onDragCancel = { start = null; end = null },
+                        onDragStart = {
+                            start = it.clamped()
+                            end = start
+                        },
+                        onDrag = { change, _ ->
+                            change.consume()
+                            end = change.position.clamped()
+                        },
+                        onDragCancel = {
+                            start = null
+                            end = null
+                        },
                         onDragEnd = {
                             val first = start
                             val last = end

@@ -34,6 +34,7 @@ abstract class NovelSearchScreenModel(
 ) : StateScreenModel<NovelSearchScreenModel.State>(initialState) {
 
     private val searchSemaphore = Semaphore(5)
+
     @Volatile
     private var searchGeneration = 0
     private var searchJob: Job? = null

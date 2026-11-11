@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.produceState
 import cafe.adriel.voyager.core.model.StateScreenModel
+import eu.kanade.domain.entries.anime.model.toDomainAnime
 import eu.kanade.presentation.util.ioCoroutineScope
 import exh.recs.sources.ANIME_RECOMMENDS_SOURCE
 import exh.recs.sources.AnimeRecommendationPagingSource
@@ -22,7 +23,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import eu.kanade.domain.entries.anime.model.toDomainAnime
 import tachiyomi.domain.entries.anime.interactor.GetAnime
 import tachiyomi.domain.entries.anime.interactor.NetworkToLocalAnime
 import tachiyomi.domain.entries.anime.model.Anime

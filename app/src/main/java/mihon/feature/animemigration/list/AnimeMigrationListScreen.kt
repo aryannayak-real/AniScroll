@@ -19,9 +19,9 @@ import eu.kanade.tachiyomi.ui.browse.animemigration.search.MigrateAnimeSearchScr
 import eu.kanade.tachiyomi.ui.browse.animemigration.season.MigrateSeasonSelectScreen
 import eu.kanade.tachiyomi.ui.entries.anime.AnimeScreen
 import eu.kanade.tachiyomi.util.system.toast
+import mihon.feature.animemigration.config.AnimeMigrationConfigScreenSheet
 import mihon.feature.animemigration.list.models.MigratingAnime
 import mihon.feature.migration.config.MigrationConfigScreen
-import mihon.feature.animemigration.config.AnimeMigrationConfigScreenSheet
 import mihon.feature.migration.list.components.MigrationExitDialog
 import mihon.feature.migration.list.components.MigrationMangaDialog
 import mihon.feature.migration.list.components.MigrationProgressDialog

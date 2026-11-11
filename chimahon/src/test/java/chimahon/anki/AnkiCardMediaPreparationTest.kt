@@ -28,7 +28,9 @@ class AnkiCardMediaPreparationTest {
                     if ((filename == "screenshot.webp" && failure == FailingStore.SCREENSHOT) ||
                         (filename == "word.mp3" && failure == FailingStore.WORD_AUDIO) ||
                         (filename == "dict.png" && failure == FailingStore.DICTIONARY_MEDIA)
-                    ) error("store failure")
+                    ) {
+                        error("store failure")
+                    }
                     filename
                 },
                 storeSentenceAudio = {

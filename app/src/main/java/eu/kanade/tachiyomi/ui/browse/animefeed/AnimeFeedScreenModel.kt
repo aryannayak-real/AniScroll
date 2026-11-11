@@ -40,7 +40,6 @@ import tachiyomi.core.common.util.lang.launchNonCancellable
 import tachiyomi.core.common.util.lang.withIOContext
 import tachiyomi.domain.entries.anime.interactor.GetAnime
 import tachiyomi.domain.entries.anime.interactor.NetworkToLocalAnime
-import tachiyomi.domain.entries.anime.model.Anime as DomainAnime
 import tachiyomi.domain.source.anime.interactor.CountAnimeFeedSavedSearchGlobal
 import tachiyomi.domain.source.anime.interactor.DeleteAnimeFeedSavedSearchById
 import tachiyomi.domain.source.anime.interactor.GetAnimeFeedSavedSearchGlobal
@@ -55,6 +54,7 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import xyz.nulldev.ts.api.http.serializer.AnimeFilterSerializer
 import java.util.concurrent.Executors
+import tachiyomi.domain.entries.anime.model.Anime as DomainAnime
 
 /**
  * Presenter of anime feed tab
@@ -328,7 +328,7 @@ open class AnimeFeedScreenModel(
                     if (anime == null) return@collectLatest
                     value = anime
                 }
-            }
+        }
     }
 
     override fun onDispose() {

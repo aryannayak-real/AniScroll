@@ -10,8 +10,6 @@ import eu.kanade.tachiyomi.data.model.ModelBundleInstaller
 import eu.kanade.tachiyomi.data.model.ModelVersionResolver
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.util.system.notify
-import java.io.File
-import java.io.InputStream
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -23,6 +21,8 @@ import tachiyomi.core.common.preference.Preference
 import tachiyomi.core.common.preference.PreferenceStore
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import java.io.File
+import java.io.InputStream
 
 class ModelDownloader(
     private val context: Context,
@@ -242,13 +242,15 @@ class ModelDownloader(
     suspend fun updateInstalledModels(): Result<Unit> {
         if (hasLensUpdate) {
             val result = downloadWithNotifications(
-                "Updating on-device OCR models...", "On-device OCR models updated",
+                "Updating on-device OCR models...",
+                "On-device OCR models updated",
             ) { downloadAndExtract() }
             if (result.isFailure) return result
         }
         if (hasPaddleUpdate) {
             val result = downloadWithNotifications(
-                "Updating Paddle OCR models...", "Paddle OCR models updated",
+                "Updating Paddle OCR models...",
+                "Paddle OCR models updated",
             ) { downloadPaddleAndExtract() }
             if (result.isFailure) return result
         }
@@ -270,12 +272,12 @@ class ModelDownloader(
             httpClient.newCall(request).execute().use { response ->
                 if (!response.isSuccessful) {
                     return@withContext Result.failure(
-                        RuntimeException("Download failed: HTTP ${response.code}")
+                        RuntimeException("Download failed: HTTP ${response.code}"),
                     )
                 }
 
                 val body = response.body ?: return@withContext Result.failure(
-                    RuntimeException("Empty response body")
+                    RuntimeException("Empty response body"),
                 )
 
                 body.byteStream().use { input -> extractZip(input, bundle) }
@@ -315,7 +317,6 @@ class ModelDownloader(
         val required = if (bundle == LENS_DIR) requiredLensFiles(abi) else requiredPaddleFiles(abi)
         ModelBundleInstaller.install(input, context.filesDir, bundle, required.map { it.relativeTo(bundleRoot).path })
     }
-
 }
 
 private fun Context.cancelNotification(id: Int) {

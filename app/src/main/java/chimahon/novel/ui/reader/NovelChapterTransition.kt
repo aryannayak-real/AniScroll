@@ -150,39 +150,41 @@ fun NovelChapterTransitionOverlay(
                                 downloaded = fromDownloaded,
                             )
                         }
-                    } else when (transition.direction) {
-                        NovelTurnDirection.PREV -> {
-                            if (transition.toIndex != null) {
+                    } else {
+                        when (transition.direction) {
+                            NovelTurnDirection.PREV -> {
+                                if (transition.toIndex != null) {
+                                    ChapterText(
+                                        header = "Previous",
+                                        name = toTitle,
+                                        downloaded = toDownloaded,
+                                    )
+                                    Spacer(Modifier.height(24.dp))
+                                } else {
+                                    EndCard(text = "There's no previous chapter")
+                                }
                                 ChapterText(
-                                    header = "Previous",
-                                    name = toTitle,
-                                    downloaded = toDownloaded,
+                                    header = "Current",
+                                    name = fromTitle,
+                                    downloaded = fromDownloaded,
+                                )
+                            }
+                            NovelTurnDirection.NEXT -> {
+                                ChapterText(
+                                    header = "Finished",
+                                    name = fromTitle,
+                                    downloaded = fromDownloaded,
                                 )
                                 Spacer(Modifier.height(24.dp))
-                            } else {
-                                EndCard(text = "There's no previous chapter")
-                            }
-                            ChapterText(
-                                header = "Current",
-                                name = fromTitle,
-                                downloaded = fromDownloaded,
-                            )
-                        }
-                        NovelTurnDirection.NEXT -> {
-                            ChapterText(
-                                header = "Finished",
-                                name = fromTitle,
-                                downloaded = fromDownloaded,
-                            )
-                            Spacer(Modifier.height(24.dp))
-                            if (transition.toIndex != null) {
-                                ChapterText(
-                                    header = "Next",
-                                    name = toTitle,
-                                    downloaded = toDownloaded,
-                                )
-                            } else {
-                                EndCard(text = "There's no next chapter")
+                                if (transition.toIndex != null) {
+                                    ChapterText(
+                                        header = "Next",
+                                        name = toTitle,
+                                        downloaded = toDownloaded,
+                                    )
+                                } else {
+                                    EndCard(text = "There's no next chapter")
+                                }
                             }
                         }
                     }

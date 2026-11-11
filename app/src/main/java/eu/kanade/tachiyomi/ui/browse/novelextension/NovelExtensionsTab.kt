@@ -1,6 +1,10 @@
 package eu.kanade.tachiyomi.ui.browse.novelextension
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.FilterList
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -10,11 +14,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import androidx.compose.foundation.layout.padding
-import androidx.compose.ui.Modifier
 import eu.kanade.presentation.browse.ExtensionScreen
 import eu.kanade.presentation.components.AppBar
 import eu.kanade.presentation.components.TabContent
@@ -27,9 +30,6 @@ import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.screens.EmptyScreen
 import tachiyomi.presentation.core.screens.EmptyScreenAction
-import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material.icons.outlined.FilterList
-import androidx.compose.material.icons.Icons
 
 @Composable
 fun novelExtensionsTab(
@@ -82,52 +82,54 @@ fun novelExtensionsTab(
                 )
             } else {
                 ExtensionScreen(
-                state = state,
-                contentPadding = contentPadding,
-                searchQuery = state.searchQuery,
-                onLongClickItem = { extension ->
-                    if (extension.pkgName == chimahon.novel.opds.OpdsSource.PACKAGE_NAME) {
-                        navigator.push(eu.kanade.tachiyomi.ui.browse.novel.NovelSourcePreferencesScreen(chimahon.novel.opds.OpdsSource.ID))
-                    } else when (extension) {
-                        is Extension.Available -> novelExtensionsScreenModel.installExtension(extension)
-                        else -> {
-                            if (context.isPackageInstalled(extension.pkgName)) {
-                                novelExtensionsScreenModel.uninstallExtension(extension)
-                            } else {
-                                privateExtensionToUninstall = extension
+                    state = state,
+                    contentPadding = contentPadding,
+                    searchQuery = state.searchQuery,
+                    onLongClickItem = { extension ->
+                        if (extension.pkgName == chimahon.novel.opds.OpdsSource.PACKAGE_NAME) {
+                            navigator.push(eu.kanade.tachiyomi.ui.browse.novel.NovelSourcePreferencesScreen(chimahon.novel.opds.OpdsSource.ID))
+                        } else {
+                            when (extension) {
+                                is Extension.Available -> novelExtensionsScreenModel.installExtension(extension)
+                                else -> {
+                                    if (context.isPackageInstalled(extension.pkgName)) {
+                                        novelExtensionsScreenModel.uninstallExtension(extension)
+                                    } else {
+                                        privateExtensionToUninstall = extension
+                                    }
+                                }
                             }
                         }
-                    }
-                },
-                onClickItemCancel = novelExtensionsScreenModel::cancelInstallUpdateExtension,
-                onClickUpdateAll = novelExtensionsScreenModel::updateAllExtensions,
-                onOpenWebView = { extension ->
-                    val mangaSource = extension.sources.getOrNull(0)
-                    if (mangaSource != null) {
-                        navigator.push(
-                            WebViewScreen(
-                                url = mangaSource.baseUrl,
-                                initialTitle = mangaSource.name,
-                                sourceId = mangaSource.id,
-                            ),
-                        )
-                    } else if (extension.pkgName.startsWith("js.")) {
-                        novelExtensionsScreenModel.getJsPluginSite(extension.pkgName)?.let { site ->
+                    },
+                    onClickItemCancel = novelExtensionsScreenModel::cancelInstallUpdateExtension,
+                    onClickUpdateAll = novelExtensionsScreenModel::updateAllExtensions,
+                    onOpenWebView = { extension ->
+                        val mangaSource = extension.sources.getOrNull(0)
+                        if (mangaSource != null) {
                             navigator.push(
                                 WebViewScreen(
-                                    url = site,
-                                    initialTitle = extension.name,
+                                    url = mangaSource.baseUrl,
+                                    initialTitle = mangaSource.name,
+                                    sourceId = mangaSource.id,
                                 ),
                             )
+                        } else if (extension.pkgName.startsWith("js.")) {
+                            novelExtensionsScreenModel.getJsPluginSite(extension.pkgName)?.let { site ->
+                                navigator.push(
+                                    WebViewScreen(
+                                        url = site,
+                                        initialTitle = extension.name,
+                                    ),
+                                )
+                            }
                         }
-                    }
-                },
-                onInstallExtension = novelExtensionsScreenModel::installExtension,
-                onOpenExtension = { navigator.push(eu.kanade.tachiyomi.ui.browse.novelextension.details.NovelExtensionDetailsScreen(it.pkgName)) },
-                onTrustExtension = { novelExtensionsScreenModel.trustExtension(it) },
-                onUninstallExtension = { novelExtensionsScreenModel.uninstallExtension(it) },
-                onUpdateExtension = novelExtensionsScreenModel::updateExtension,
-                onRefresh = novelExtensionsScreenModel::findAvailableExtensions,
+                    },
+                    onInstallExtension = novelExtensionsScreenModel::installExtension,
+                    onOpenExtension = { navigator.push(eu.kanade.tachiyomi.ui.browse.novelextension.details.NovelExtensionDetailsScreen(it.pkgName)) },
+                    onTrustExtension = { novelExtensionsScreenModel.trustExtension(it) },
+                    onUninstallExtension = { novelExtensionsScreenModel.uninstallExtension(it) },
+                    onUpdateExtension = novelExtensionsScreenModel::updateExtension,
+                    onRefresh = novelExtensionsScreenModel::findAvailableExtensions,
                 )
             }
 

@@ -3,12 +3,12 @@ package chimahon.novel.ui.detail
 import android.content.Context
 import chimahon.novel.data.BookStorage
 import eu.kanade.tachiyomi.sourcenovel.NovelSource
-import org.jsoup.Jsoup
-import org.jsoup.safety.Safelist
 import eu.kanade.tachiyomi.sourcenovel.model.ChapterContent
 import eu.kanade.tachiyomi.sourcenovel.model.ContentItem
 import eu.kanade.tachiyomi.sourcenovel.model.SNNovel
 import kotlinx.serialization.Serializable
+import org.jsoup.Jsoup
+import org.jsoup.safety.Safelist
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.io.File

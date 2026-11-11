@@ -4,9 +4,9 @@ import android.app.Application
 import androidx.compose.runtime.Immutable
 import cafe.adriel.voyager.core.model.StateScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
+import chimahon.novel.data.BookStorage
 import chimahon.novel.manager.NovelSourceManager
 import chimahon.novel.ui.detail.SourceChapterBookBuilder
-import chimahon.novel.data.BookStorage
 import eu.kanade.tachiyomi.sourcenovel.model.SNNovel
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -18,9 +18,9 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import logcat.LogPriority
-import tachiyomi.core.common.util.system.logcat
 import tachiyomi.core.common.util.lang.launchIO
 import tachiyomi.core.common.util.lang.withIOContext
+import tachiyomi.core.common.util.system.logcat
 import tachiyomi.domain.novel.model.Novel
 import tachiyomi.domain.novel.model.NovelHistoryEntry
 import tachiyomi.domain.novel.repository.NovelChapterRepository

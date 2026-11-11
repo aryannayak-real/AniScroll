@@ -227,7 +227,9 @@ internal object SentenceAudioInputResolver {
                 scheme,
                 allowHlsToken = allowHlsToken && scheme == "https" && isHlsLikeInput(value),
             )
-        ) return null
+        ) {
+            return null
+        }
         return headers.takeIf { it.all(::isAllowedHeader) }
     }
 
@@ -242,7 +244,7 @@ internal object SentenceAudioInputResolver {
 
     private fun isAllowedHeader(header: Pair<String, String>): Boolean {
         val (name, value) = header
-        return name.lowercase(Locale.ROOT) in allowedHttpHeaders && value.length <= maxHeaderValueLength &&
+        return name.lowercase(Locale.ROOT) in allowedHttpHeaders && value.length <= MAX_HEADER_VALUE_LENGTH &&
             value.none { it == '\u0000' || it == '\r' || it == '\n' || (it.code < 0x20 && it != '\t') }
     }
 
@@ -291,25 +293,66 @@ internal object SentenceAudioInputResolver {
     private val sensitiveLogQueryNames = setOf("access_token", "api_key", "auth", "authorization", "credential", "credentials", "key", "policy", "signature", "signed", "sig", "lsig", "token")
     private val sensitiveQueryPrefixes = setOf("x-amz-", "x-goog-")
     private val transientSchemes = setOf("blob", "data", "fd", "fdclose", "edl", "memory", "lavf", "ytdl")
-    private const val maxHeaderValueLength = 8_192
+    private const val MAX_HEADER_VALUE_LENGTH = 8_192
 }
 
 internal object SentenceAudioFfmpegArguments {
     fun audioProbe(input: SentenceAudioInputSpec, acquiredInputValue: String, tlsCaFile: String? = null): Array<String> = probe(input, acquiredInputValue, input.audioStreamIndex?.toString() ?: "a:0", "stream=codec_type,codec_name:stream_side_data", tlsCaFile)
     fun allAudioProbe(input: SentenceAudioInputSpec, acquiredInputValue: String, tlsCaFile: String? = null): Array<String> = probe(input, acquiredInputValue, "a", "stream=index,codec_type,codec_name:stream_side_data", tlsCaFile)
     private fun probe(input: SentenceAudioInputSpec, acquired: String, selector: String, entries: String, ca: String?) = buildList {
-        addInputOptions(input, ca); add("-v"); add("error"); add("-select_streams"); add(selector); add("-show_entries"); add(entries); add("-of"); add("default=noprint_wrappers=1"); add(acquired)
+        addInputOptions(input, ca)
+        add("-v")
+        add("error")
+        add("-select_streams")
+        add(selector)
+        add("-show_entries")
+        add(entries)
+        add("-of")
+        add("default=noprint_wrappers=1")
+        add(acquired)
     }.toTypedArray()
     fun sentenceAudio(input: SentenceAudioInputSpec, acquired: String, start: Double, end: Double, output: String, tlsCaFile: String? = null) = buildList {
-        addInputOptions(input, tlsCaFile); add("-ss"); add(start.seconds()); add("-i"); add(acquired); add("-map"); add(input.audioStreamIndex?.let { "0:$it" } ?: "0:a:0"); add("-vn"); add("-sn"); add("-dn"); add("-t"); add((end - start).seconds()); add("-c:a"); add("aac"); add("-b:a"); add("128k"); add("-y"); add(output)
+        addInputOptions(input, tlsCaFile)
+        add("-ss")
+        add(start.seconds())
+        add("-i")
+        add(acquired)
+        add("-map")
+        add(input.audioStreamIndex?.let { "0:$it" } ?: "0:a:0")
+        add("-vn")
+        add("-sn")
+        add("-dn")
+        add("-t")
+        add((end - start).seconds())
+        add("-c:a")
+        add("aac")
+        add("-b:a")
+        add("128k")
+        add("-y")
+        add(output)
     }.toTypedArray()
     private fun MutableList<String>.addInputOptions(input: SentenceAudioInputSpec, tlsCaFile: String?) {
-        if (input.kind == SentenceAudioInputKind.REMOTE_HTTP) { require(!tlsCaFile.isNullOrBlank()); add("-rw_timeout"); add("15000000") }
-        if (isHlsLikeInput(input.value) || input.forceMpegTs) {
-            add("-allowed_extensions"); add("ALL"); add("-allowed_segment_extensions"); add("ALL"); add("-extension_picky"); add("0")
+        if (input.kind == SentenceAudioInputKind.REMOTE_HTTP) {
+            require(!tlsCaFile.isNullOrBlank())
+            add("-rw_timeout")
+            add("15000000")
         }
-        if (input.forceMpegTs) { add("-force_mpegts"); add("1") }
-        if (input.headers.isNotEmpty()) { add("-headers"); add(input.headers.joinToString("") { "${it.first}: ${it.second}\r\n" }) }
+        if (isHlsLikeInput(input.value) || input.forceMpegTs) {
+            add("-allowed_extensions")
+            add("ALL")
+            add("-allowed_segment_extensions")
+            add("ALL")
+            add("-extension_picky")
+            add("0")
+        }
+        if (input.forceMpegTs) {
+            add("-force_mpegts")
+            add("1")
+        }
+        if (input.headers.isNotEmpty()) {
+            add("-headers")
+            add(input.headers.joinToString("") { "${it.first}: ${it.second}\r\n" })
+        }
     }
     private fun Double.seconds() = String.format(Locale.ROOT, "%.6f", this).trimEnd('0').trimEnd('.')
 }
@@ -340,7 +383,9 @@ internal object SentenceAudioMediaProbe {
 
     private fun String.keyValues(): Map<String, String> = lineSequence().mapNotNull { line ->
         val separator = line.indexOf('=')
-        if (separator <= 0) null else {
+        if (separator <= 0) {
+            null
+        } else {
             line.substring(0, separator).trim().lowercase(Locale.ROOT) to
                 line.substring(separator + 1).trim().lowercase(Locale.ROOT)
         }
@@ -352,7 +397,10 @@ internal object SentenceAudioMediaProbe {
         lineSequence().forEach { line ->
             when (line.trim()) {
                 "[STREAM]" -> current = StringBuilder()
-                "[/STREAM]" -> current?.let { blocks += it.toString(); current = null }
+                "[/STREAM]" -> current?.let {
+                    blocks += it.toString()
+                    current = null
+                }
                 else -> current?.append(line)?.append('\n')
             }
         }
@@ -417,8 +465,12 @@ internal data class SentenceAudioDiagnosticEvent(
     val result: FfmpegCommandResult? = null,
     val exceptionType: String? = null,
 )
-internal fun interface SentenceAudioDiagnosticLogger { fun record(event: SentenceAudioDiagnosticEvent) }
-internal object NoOpSentenceAudioDiagnosticLogger : SentenceAudioDiagnosticLogger { override fun record(event: SentenceAudioDiagnosticEvent) = Unit }
+internal fun interface SentenceAudioDiagnosticLogger {
+    fun record(event: SentenceAudioDiagnosticEvent)
+}
+internal object NoOpSentenceAudioDiagnosticLogger : SentenceAudioDiagnosticLogger {
+    override fun record(event: SentenceAudioDiagnosticEvent) = Unit
+}
 internal class LogcatSentenceAudioDiagnosticLogger : SentenceAudioDiagnosticLogger {
     override fun record(event: SentenceAudioDiagnosticEvent) {
         logcat(LogPriority.INFO) {
@@ -459,7 +511,7 @@ internal object SentenceAudioDiagnosticJournal {
         val diagnostics = result.nativeDiagnostics ?: return
         diagnostics.returnCode?.let { appendLine("return_code=$it") }
         val detail = redact(sequenceOf(diagnostics.failStackTrace, diagnostics.logs).filterNotNull().joinToString("\n"))
-            .takeLast(maxNativeDiagnosticChars)
+            .takeLast(MAX_NATIVE_DIAGNOSTIC_CHARS)
             .trim()
             .takeIf(String::isNotEmpty) ?: return
         appendLine("native_diagnostic_begin")
@@ -472,14 +524,14 @@ internal object SentenceAudioDiagnosticJournal {
             .replace(sensitiveQueryPattern, "${'$'}1=<redacted>")
             .replace(sensitiveHeaderPattern, "${'$'}1<redacted>")
             .replace(localPathPattern, "<redacted-path>")
-    private const val maxNativeDiagnosticChars = 32 * 1024
+    private const val MAX_NATIVE_DIAGNOSTIC_CHARS = 32 * 1024
     private val urlPattern = Regex("""(?i)\b(?:https?|file)://[^\s"'<>]+""")
     private val sensitiveQueryPattern = Regex("""(?i)\b(access_token|api_key|auth|authorization|credential|credentials|key|policy|signature|signed|sig|lsig|token|x-amz-[^=\s]+|x-goog-[^=\s]+)=([^&\s]+)""")
     private val sensitiveHeaderPattern = Regex("""(?im)^((?:authorization|cookie|referer|origin|user-agent|accept(?:-[a-z-]+)?|cache-control|pragma|proxy-authorization|x-[a-z0-9-]+)\s*:\s*).*$""")
     private val localPathPattern = Regex("""(?i)(?:[a-z]:\\|/(?:data|storage|sdcard|mnt|cache|files)/)[^\s"'<>]+""")
 }
 
-private const val nativeErrorMaxChars = 2 * 1024
+private const val NATIVE_ERROR_MAX_CHARS = 2 * 1024
 
 /** Immutable inputs captured while OCR is selected; this service never reads live player state. */
 internal data class SentenceAudioCaptureRequest(
@@ -698,12 +750,17 @@ internal class SentenceAudioCaptureService(
             output.delete()
             val result = FfmpegRunner.ffmpeg(
                 SentenceAudioFfmpegArguments.sentenceAudio(input, lease.ffmpegValue, range.start, range.endInclusive, output.absolutePath, lease.tlsCaFile),
-            ) { inputCleanup.nativeFinished(); outputCleanup.nativeFinished() }
+            ) {
+                inputCleanup.nativeFinished()
+                outputCleanup.nativeFinished()
+            }
             val failure = result.extractionFailure()
             record(SentenceAudioDiagnosticStage.AUDIO_EXTRACTION, input, input.fallback(), failure, result)
             if (failure != null) return unavailable(failure, input, result = result)
             if (!output.isFile || output.length() == 0L) return unavailable(AnkiSentenceAudioFailure.EXTRACTION_OUTPUT_MISSING, input, SentenceAudioDiagnosticStage.OUTPUT_VALIDATION, result)
-            val bytes = try { output.readBytes() } catch (e: Exception) {
+            val bytes = try {
+                output.readBytes()
+            } catch (e: Exception) {
                 return unavailable(AnkiSentenceAudioFailure.EXTRACTION_OUTPUT_READ_FAILED, input, SentenceAudioDiagnosticStage.OUTPUT_READ, result, e.javaClass.name)
             }
             AnkiSentenceAudioPreparation.Ready(AnkiSentenceAudioSource.fromBytes(bytes, "m4a"))
@@ -764,7 +821,7 @@ internal class SentenceAudioCaptureService(
         }
         return SentenceAudioDiagnosticJournal.redact(text.trim())
             .takeIf(String::isNotEmpty)
-            ?.take(nativeErrorMaxChars)
+            ?.take(NATIVE_ERROR_MAX_CHARS)
     }
     private fun SentenceAudioInputSpec.fallback() = if (origin == SentenceAudioInputOrigin.PLAYABLE_VIDEO) SentenceAudioDiagnosticFallback.ATTEMPTED else SentenceAudioDiagnosticFallback.NOT_APPLICABLE
     private fun AnkiSentenceAudioPlayableFallback.toDiagnosticFallback() = when (this) {
@@ -782,7 +839,11 @@ internal class SentenceAudioCaptureService(
         SELECTED(SentenceAudioDiagnosticStage.SELECTED_AUDIO_PROBE),
         ALL(SentenceAudioDiagnosticStage.ALL_AUDIO_PROBE),
     }
-    private sealed interface ProbeResult { data object SourceUnavailable : ProbeResult; data class Failed(val result: FfmpegCommandResult? = null) : ProbeResult; data class Success(val output: String) : ProbeResult }
+    private sealed interface ProbeResult {
+        data object SourceUnavailable : ProbeResult
+        data class Failed(val result: FfmpegCommandResult? = null) : ProbeResult
+        data class Success(val output: String) : ProbeResult
+    }
 }
 
 /** Defer a resource release until FFmpegKit reports that its native work is no longer using it. */
@@ -791,9 +852,20 @@ private class NativeCleanup(private val action: () -> Unit) {
     private var nativeFinished = false
     private var releaseRequested = false
     private var released = false
-    fun nativeFinished() = synchronized(lock) { nativeFinished = true; releaseIfReady() }
-    fun release() = synchronized(lock) { releaseRequested = true; releaseIfReady() }
-    private fun releaseIfReady() { if (nativeFinished && releaseRequested && !released) { released = true; action() } }
+    fun nativeFinished() = synchronized(lock) {
+        nativeFinished = true
+        releaseIfReady()
+    }
+    fun release() = synchronized(lock) {
+        releaseRequested = true
+        releaseIfReady()
+    }
+    private fun releaseIfReady() {
+        if (nativeFinished && releaseRequested && !released) {
+            released = true
+            action()
+        }
+    }
 }
 
 internal class AndroidSentenceAudioInputAcquirer(

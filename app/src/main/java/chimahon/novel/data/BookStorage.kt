@@ -84,9 +84,9 @@ object BookStorage {
         targetFile.writeText(data)
         // Reader hot path uses save() directly (not saveBookmark/saveMetadata).
         when (fileName) {
-            FileNames.bookmark, FileNames.metadata, FileNames.bookinfo ->
+            FileNames.BOOKMARK, FileNames.METADATA, FileNames.BOOKINFO ->
                 chimahon.widget.ImmersionWidgetSignals.notifyNovelsChanged()
-            FileNames.statistics ->
+            FileNames.STATISTICS ->
                 chimahon.widget.ImmersionWidgetSignals.notifyStatsChanged()
         }
     }
@@ -103,27 +103,27 @@ object BookStorage {
         }
     }
     fun saveBookmark(bookmark: Bookmark, directory: File) {
-        save(bookmark, directory, FileNames.bookmark)
+        save(bookmark, directory, FileNames.BOOKMARK)
     }
 
     fun loadBookmark(directory: File): Bookmark? {
-        return load(directory, FileNames.bookmark)
+        return load(directory, FileNames.BOOKMARK)
     }
 
     fun saveMetadata(metadata: BookMetadata, directory: File) {
-        save(metadata, directory, FileNames.metadata)
+        save(metadata, directory, FileNames.METADATA)
     }
 
     fun loadMetadata(directory: File): BookMetadata? {
-        return load(directory, FileNames.metadata)
+        return load(directory, FileNames.METADATA)
     }
 
     fun saveStatistics(statistics: List<Statistics>, directory: File) {
-        save(statistics, directory, FileNames.statistics)
+        save(statistics, directory, FileNames.STATISTICS)
     }
 
     fun loadStatistics(directory: File): List<Statistics>? {
-        return load(directory, FileNames.statistics)
+        return load(directory, FileNames.STATISTICS)
     }
 
     fun loadAllBooks(context: android.content.Context): List<BookMetadata> {
@@ -205,7 +205,7 @@ object BookStorage {
         val dir = getBookDirectory(context, bookId)
         if (hasImportedBookContent(dir)) return true
         if (dir.isDirectory && dir.listFiles()
-            ?.any { it.isFile && it.extension.equals("epub", ignoreCase = true) } == true
+                ?.any { it.isFile && it.extension.equals("epub", ignoreCase = true) } == true
         ) {
             return true
         }
@@ -238,7 +238,8 @@ object BookStorage {
         }
     }
 
-    fun deleteBook(context: android.content.Context, bookId: String): Boolean {        var deletedAny = false
+    fun deleteBook(context: android.content.Context, bookId: String): Boolean {
+        var deletedAny = false
         // Public original first, UniFile-first (one path for file and tree
         // schemes alike).
         runCatching { LocalNovelFiles.publicRootUni(context)?.findFile(bookId) }
@@ -340,7 +341,9 @@ object BookStorage {
         name: String,
     ): BookMetadata? {
         val text = LocalNovelFiles.readSidecarText(
-            context.contentResolver, uniDir, FileNames.metadata,
+            context.contentResolver,
+            uniDir,
+            FileNames.METADATA,
         ) ?: return null
         return try {
             kotlinx.serialization.json.Json { ignoreUnknownKeys = true }

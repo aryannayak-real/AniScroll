@@ -3,7 +3,6 @@ package eu.kanade.tachiyomi.data.sync.service
 import android.content.Context
 import chimahon.novel.data.NovelCategory
 import eu.kanade.domain.sync.SyncPreferences
-import eu.kanade.tachiyomi.util.lang.Hash
 import eu.kanade.tachiyomi.data.backup.models.Backup
 import eu.kanade.tachiyomi.data.backup.models.BackupAnime
 import eu.kanade.tachiyomi.data.backup.models.BackupAnimeSource
@@ -20,6 +19,7 @@ import eu.kanade.tachiyomi.data.backup.models.BackupSavedSearch
 import eu.kanade.tachiyomi.data.backup.models.BackupSource
 import eu.kanade.tachiyomi.data.backup.models.BackupSourceNovel
 import eu.kanade.tachiyomi.data.backup.models.BackupSourcePreferences
+import eu.kanade.tachiyomi.util.lang.Hash
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import logcat.LogPriority

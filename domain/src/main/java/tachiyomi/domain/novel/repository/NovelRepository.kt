@@ -24,7 +24,7 @@ interface NovelRepository {
 
     suspend fun getNovelsBySourceId(sourceId: Long): List<Novel>
 
-suspend fun getAll(): List<Novel>
+    suspend fun getAll(): List<Novel>
 
     /** Novels in the library, through novel_libraryView. */
     suspend fun getLibraryNovels(): List<Novel>

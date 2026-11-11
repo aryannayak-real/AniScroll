@@ -68,10 +68,10 @@ class NovelExtensionFilterScreenModel(
             ) { catalog, installedApk, availableApk, enabledLanguages ->
                 val allLangs = (
                     catalog.available.map { it.normalizedLanguage() } +
-                    catalog.installed.map { it.descriptor.normalizedLanguage() } +
-                    installedApk.map { it.lang } +
-                    availableApk.map { it.lang }
-                ).filter { it.isNotBlank() }
+                        catalog.installed.map { it.descriptor.normalizedLanguage() } +
+                        installedApk.map { it.lang } +
+                        availableApk.map { it.lang }
+                    ).filter { it.isNotBlank() }
                     .distinct()
                     .sortedWith(compareBy({ it != "all" }, { it }))
 

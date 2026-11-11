@@ -142,9 +142,11 @@ class AnimeRecommendationSource(
     @Suppress("DEPRECATION")
     override fun fetchPopularAnime(page: Int) =
         (delegate ?: throw UnsupportedOperationException()).fetchPopularAnime(page)
+
     @Suppress("DEPRECATION")
     override fun fetchSearchAnime(page: Int, query: String, filters: AnimeFilterList) =
         (delegate ?: throw UnsupportedOperationException()).fetchSearchAnime(page, query, filters)
+
     @Suppress("DEPRECATION")
     override fun fetchLatestUpdates(page: Int) =
         (delegate ?: throw UnsupportedOperationException()).fetchLatestUpdates(page)
