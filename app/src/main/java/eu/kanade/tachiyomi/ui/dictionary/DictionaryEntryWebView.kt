@@ -181,7 +181,7 @@ fun DictionaryEntryWebView(
         )
     }
 
-    Box(modifier = modifier.background(BgColor)) {
+    Box(modifier = modifier.background(bgColor)) {
         AndroidView<WebView>(
             modifier = Modifier.fillMaxSize(),
             factory = { ctx: android.content.Context ->
@@ -189,7 +189,7 @@ fun DictionaryEntryWebView(
                 (webView.parent as? android.view.ViewGroup)?.removeView(webView)
 
                 if (webView.tag !is DictionaryWebViewState) {
-                    prepareDictionaryWebViewShell(ctx, webView, bootstrapHtml, BgColor.toArgb())
+                    prepareDictionaryWebViewShell(ctx, webView, bootstrapHtml, bgColor.toArgb())
                 }
                 (webView.tag as? DictionaryWebViewState)?.let { state ->
                     state.onContentInvalidated = {
@@ -255,7 +255,7 @@ fun DictionaryEntryWebView(
                     webView.alpha = 1f
                 }
 
-                webView.setBackgroundColor(BgColor.toArgb())
+                webView.setBackgroundColor(bgColor.toArgb())
 
                 if (state.pageReady) {
                     val enableRecursive = onRecursiveLookup != null
