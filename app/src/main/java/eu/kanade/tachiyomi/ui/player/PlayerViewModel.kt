@@ -2201,7 +2201,10 @@ class PlayerViewModel @JvmOverloads constructor(
     private fun updateEpisode(episode: Episode) {
         mediaTitle.update { _ -> episode.name }
         _isEpisodeOnline.update { _ -> isEpisodeOnline() == true }
-        MPVLib.setPropertyDouble("user-data/current-anime/episode-number", episode.episode_number.toDouble    private fun initEpisodeList(anime: Anime, selectedEpisodeId: Long): List<Episode> {
+        MPVLib.setPropertyDouble("user-data/current-anime/episode-number", episode.episode_number.toDouble())
+    }
+
+    private fun initEpisodeList(anime: Anime, selectedEpisodeId: Long): List<Episode> {
         val episodes = runBlocking { getEpisodesByAnimeId.await(anime.id) }
             .sortedWith(getEpisodeSort(anime, sortDescending = false))
 
@@ -2223,8 +2226,6 @@ class PlayerViewModel @JvmOverloads constructor(
         }
 
         return playableEpisodes.map { it.toDbEpisode() }
-    }
-() }
     }
 
     private var hasTrackers: Boolean = false
