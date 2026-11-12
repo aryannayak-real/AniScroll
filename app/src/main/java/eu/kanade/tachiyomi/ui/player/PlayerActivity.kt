@@ -319,6 +319,7 @@ class PlayerActivity : BaseActivity() {
                 withUIContext {
                     setInitialEpisodeError(exception)
                 }
+                return@launchNonCancellable
             }
 
             viewModel.updateIsLoadingHosters(false)

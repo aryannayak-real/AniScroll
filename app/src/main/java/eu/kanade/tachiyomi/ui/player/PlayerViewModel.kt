@@ -2134,7 +2134,7 @@ class PlayerViewModel @JvmOverloads constructor(
 
                 checkTrackers(anime)
 
-                updateEpisodeList(initEpisodeList(anime))
+                updateEpisodeList(initEpisodeList(anime, episodeId))
 
                 val episode = currentPlaylist.value.first { it.id == episodeId }
                 val source = sourceManager.getOrStub(anime.source)
@@ -2201,22 +2201,30 @@ class PlayerViewModel @JvmOverloads constructor(
     private fun updateEpisode(episode: Episode) {
         mediaTitle.update { _ -> episode.name }
         _isEpisodeOnline.update { _ -> isEpisodeOnline() == true }
-        MPVLib.setPropertyDouble("user-data/current-anime/episode-number", episode.episode_number.toDouble())
-    }
-
-    private fun initEpisodeList(anime: Anime): List<Episode> {
+        MPVLib.setPropertyDouble("user-data/current-anime/episode-number", episode.episode_number.toDouble    private fun initEpisodeList(anime: Anime, selectedEpisodeId: Long): List<Episode> {
         val episodes = runBlocking { getEpisodesByAnimeId.await(anime.id) }
-
-        return episodes
             .sortedWith(getEpisodeSort(anime, sortDescending = false))
-            .run {
-                if (basePreferences.downloadedOnly().get()) {
-                    filterDownloadedEpisodes(anime)
-                } else {
-                    this
-                }
-            }
-            .map { it.toDbEpisode() }
+
+        val filteredEpisodes = if (basePreferences.downloadedOnly().get()) {
+            episodes.filterDownloadedEpisodes(anime)
+        } else {
+            episodes
+        }
+
+        val selectedEpisode = episodes.find { it.id == selectedEpisodeId }
+        val playableEpisodes = if (
+            selectedEpisode != null &&
+            filteredEpisodes.none { it.id == selectedEpisodeId }
+        ) {
+            (filteredEpisodes + selectedEpisode)
+                .sortedWith(getEpisodeSort(anime, sortDescending = false))
+        } else {
+            filteredEpisodes
+        }
+
+        return playableEpisodes.map { it.toDbEpisode() }
+    }
+() }
     }
 
     private var hasTrackers: Boolean = false
