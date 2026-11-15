@@ -80,11 +80,11 @@ jobs:
           set -e
           dir="app/build/outputs/apk/preview"
           tag="${{ steps.version.outputs.tag }}"
-          mv "$dir/app-universal-preview-unsigned-signed.apk" "AniScroll-$tag.apk"
-          mv "$dir/app-arm64-v8a-preview-unsigned-signed.apk" "AniScroll-arm64-v8a-$tag.apk"
-          mv "$dir/app-armeabi-v7a-preview-unsigned-signed.apk" "AniScroll-armeabi-v7a-$tag.apk"
-          mv "$dir/app-x86-preview-unsigned-signed.apk" "AniScroll-x86-$tag.apk"
-          mv "$dir/app-x86_64-preview-unsigned-signed.apk" "AniScroll-x86_64-$tag.apk"
+          mv "$dir/app-universal-preview-signed.apk" "AniScroll-$tag.apk"
+          mv "$dir/app-arm64-v8a-preview-signed.apk" "AniScroll-arm64-v8a-$tag.apk"
+          mv "$dir/app-armeabi-v7a-preview-signed.apk" "AniScroll-armeabi-v7a-$tag.apk"
+          mv "$dir/app-x86-preview-signed.apk" "AniScroll-x86-$tag.apk"
+          mv "$dir/app-x86_64-preview-signed.apk" "AniScroll-x86_64-$tag.apk"
 
       - name: Create preview prerelease
         uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2.5.0
