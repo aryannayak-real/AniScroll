@@ -39,3 +39,6 @@ AGENTS.md
 /AnkiconnectAndroid
 *.patch
 /docs
+
+# Local AniScroll signing keys
+/keystore-backup/
