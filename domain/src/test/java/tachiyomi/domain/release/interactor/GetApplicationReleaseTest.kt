@@ -41,6 +41,7 @@ class GetApplicationReleaseTest {
                 "info",
                 "http://example.com/release_link",
                 "http://example.com/release_link.apk",
+                  preRelease = true,
             ),
         )
 
@@ -149,5 +150,84 @@ class GetApplicationReleaseTest {
         coVerify(exactly = 0) { releaseService.latest(any()) }
         coVerify(exactly = 0) { releaseService.releaseNotes(any()) }
         result shouldBe GetApplicationRelease.Result.NoNewUpdate
+    }
+
+    @Test
+    fun `Stable build ignores preview releases`() = runTest {
+        every { preference.get() } returns 0
+        every { preference.set(any()) }.answers { }
+
+        coEvery { releaseService.releaseNotes(any()) } returns listOf(
+            Release("v9.0.0", "info", "release", "apk", preRelease = true),
+        )
+
+        val result = getApplicationRelease.await(
+            GetApplicationRelease.Arguments(
+                isFoss = false,
+                isPreview = false,
+                commitCount = 0,
+                versionName = "v1.0.0",
+                repository = "test",
+            ),
+        )
+
+        result shouldBe GetApplicationRelease.Result.NoNewUpdate
+    }
+
+    @Test
+    fun `Preview build ignores stable releases`() = runTest {
+        every { preference.get() } returns 0
+        every { preference.set(any()) }.answers { }
+
+        coEvery { releaseService.releaseNotes(any()) } returns listOf(
+            Release("r9000", "info", "release", "apk"),
+        )
+
+        val result = getApplicationRelease.await(
+            GetApplicationRelease.Arguments(
+                isFoss = false,
+                isPreview = true,
+                commitCount = 1000,
+                versionName = "",
+                repository = "test",
+            ),
+        )
+
+        result shouldBe GetApplicationRelease.Result.NoNewUpdate
+    }
+
+    @Test
+    fun `Both builds ignore draft releases`() = runTest {
+        every { preference.get() } returns 0
+        every { preference.set(any()) }.answers { }
+
+        coEvery { releaseService.releaseNotes(any()) } returns listOf(
+            Release("v9.0.0", "info", "release", "apk", draft = true),
+            Release("r9000", "info", "release", "apk", preRelease = true, draft = true),
+        )
+
+        val stableResult = getApplicationRelease.await(
+            GetApplicationRelease.Arguments(
+                isFoss = false,
+                isPreview = false,
+                commitCount = 0,
+                versionName = "v1.0.0",
+                repository = "test",
+            ),
+        )
+
+        stableResult shouldBe GetApplicationRelease.Result.NoNewUpdate
+
+        val previewResult = getApplicationRelease.await(
+            GetApplicationRelease.Arguments(
+                isFoss = false,
+                isPreview = true,
+                commitCount = 1000,
+                versionName = "",
+                repository = "test",
+            ),
+        )
+
+        previewResult shouldBe GetApplicationRelease.Result.NoNewUpdate
     }
 }

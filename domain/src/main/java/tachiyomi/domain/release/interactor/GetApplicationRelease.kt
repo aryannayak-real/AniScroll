@@ -11,7 +11,6 @@ class GetApplicationRelease(
     private val service: ReleaseService,
     private val preferenceStore: PreferenceStore,
 ) {
-
     private val lastChecked: Preference<Long> by lazy {
         preferenceStore.getLong(Preference.appStateKey("last_app_check"), 0)
     }
@@ -25,11 +24,10 @@ class GetApplicationRelease(
             return Result.NoNewUpdate
         }
 
-        // KMK -->
         val releases = service.releaseNotes(arguments)
             .filter {
-                !it.preRelease &&
-                    !it.draft &&
+                !it.draft &&
+                    it.preRelease == arguments.isPreview &&
                     isNewVersion(
                         arguments.isPreview,
                         arguments.commitCount,
@@ -39,41 +37,40 @@ class GetApplicationRelease(
             }
 
         val latest = releases.getLatest() ?: return Result.NoNewUpdate
-        // KMK <--
 
         lastChecked.set(now.toEpochMilli())
 
-        // Check if latest version is different from current version
         val isNewVersion = isNewVersion(
             isPreview = arguments.isPreview,
             commitCount = arguments.commitCount,
             versionName = arguments.versionName,
             versionTag = latest.version,
         )
-        return when {
-            isNewVersion -> Result.NewUpdate(latest)
-            else -> Result.NoNewUpdate
+
+        return if (isNewVersion) {
+            Result.NewUpdate(latest)
+        } else {
+            Result.NoNewUpdate
         }
     }
 
-    // KMK -->
     suspend fun awaitReleaseNotes(arguments: Arguments): Result {
         val releases = service.releaseNotes(arguments)
-            .filter { !it.preRelease }
+            .filter {
+                !it.draft && it.preRelease == arguments.isPreview
+            }
 
         val latest = releases.getLatest() ?: return Result.NoNewUpdate
         return Result.NewUpdate(latest)
     }
-    // KMK <--
 
     /**
-     * [isPreview] is if current version is Preview (beta) build
+     * [isPreview] is if current version is Preview (beta) build.
      *
-     * [versionTag] is the version of new release
+     * [versionTag] is the version of new release.
      *
-     * Release (stable) version will compare with current's [versionName] ("v0.1.2")
-     *
-     * Preview (beta) version will compare with current's [commitCount] ("r1234")
+     * Release (stable) version compares with current's [versionName] ("v0.1.2").
+     * Preview (beta) version compares with current's [commitCount] ("r1234").
      */
     private fun isNewVersion(
         isPreview: Boolean,
@@ -81,15 +78,11 @@ class GetApplicationRelease(
         versionName: String,
         versionTag: String,
     ): Boolean {
-        // Removes prefixes like "r" or "v"
         val newVersion = versionTag.replace("[^\\d.]".toRegex(), "")
+
         return if (isPreview) {
-            // Preview builds: based on releases in "chimahon/chimahon-preview" repo
-            // tagged as something like "r1234"
             newVersion.toIntOrNull()?.let { it > commitCount } ?: false
         } else {
-            // Release builds: based on releases in "chimahon/chimahon" repo
-            // tagged as something like "v0.1.2"
             val oldVersion = versionName.replace("[^\\d.]".toRegex(), "")
 
             val newSemVer = parseSemVerParts(newVersion)
@@ -99,9 +92,8 @@ class GetApplicationRelease(
             for (index in 0 until compareLength) {
                 val newPart = newSemVer.getOrElse(index) { 0 }
                 val oldPart = oldSemVer.getOrElse(index) { 0 }
-                if (newPart > oldPart) {
-                    return true
-                }
+
+                if (newPart > oldPart) return true
                 if (newPart < oldPart) return false
             }
 
@@ -136,7 +128,6 @@ class GetApplicationRelease(
     }
 }
 
-// KMK --.
 internal fun List<Release>.getLatest(): Release? {
     return firstOrNull()
         ?.copy(
@@ -146,4 +137,3 @@ internal fun List<Release>.getLatest(): Release? {
             },
         )
 }
-// KMK <--

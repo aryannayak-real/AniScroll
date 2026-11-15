@@ -95,7 +95,7 @@ class AppUpdateChecker(
 
 val GITHUB_REPO: String by lazy { getGithubRepo() }
 
-fun getGithubRepo(peekIntoPreview: Boolean = false): String = "Chimahon/chimahon"
+fun getGithubRepo(peekIntoPreview: Boolean = false): String = "aryannayak-real/AniScroll"
 
 val RELEASE_TAG: String by lazy { getReleaseTag() }
 

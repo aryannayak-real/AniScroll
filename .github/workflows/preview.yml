@@ -1,0 +1,107 @@
+name: Preview
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: preview-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build preview
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+
+      - name: Get preview version
+        id: version
+        run: |
+          count="$(git rev-list --count HEAD)"
+          echo "count=$count" >> "$GITHUB_OUTPUT"
+          echo "tag=r$count" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout submodules
+        env:
+          GH_PAT: ${{ secrets.GH_PAT }}
+        run: |
+          git config --global url."https://github.com/".insteadOf "git@github.com:"
+          if [ -n "$GH_PAT" ]; then
+            git config --global url."https://$GH_PAT@github.com/".insteadOf "https://github.com/"
+          fi
+          git submodule update --init --recursive
+
+      - name: Set up JDK
+        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5.2.0
+        with:
+          java-version: 17
+          distribution: temurin
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c # v5.0.2
+
+      - name: Write client_secrets.json (optional)
+        env:
+          GOOGLE_CLIENT_SECRETS_JSON: ${{ secrets.GOOGLE_CLIENT_SECRETS_JSON }}
+        run: |
+          if [ -n "$GOOGLE_CLIENT_SECRETS_JSON" ]; then
+            mkdir -p app/src/main/assets
+            printf '%s' "$GOOGLE_CLIENT_SECRETS_JSON" > app/src/main/assets/client_secrets.json
+          fi
+
+      - name: Clean CMake cache
+        run: rm -rf app/.cxx chimahon/.cxx
+
+      - name: Build preview APKs
+        run: ./gradlew assemblePreview -Penable-updater -PreleaseVersionCode=${{ steps.version.outputs.count }}
+
+      - name: Sign preview APKs
+        uses: r0adkll/sign-android-release@f30bdd30588842ac76044ecdbd4b6d0e3e813478
+        with:
+          releaseDirectory: app/build/outputs/apk/preview
+          signingKeyBase64: ${{ secrets.PREVIEW_SIGNING_KEY }}
+          alias: ${{ secrets.PREVIEW_ALIAS }}
+          keyStorePassword: ${{ secrets.PREVIEW_KEY_STORE_PASSWORD }}
+          keyPassword: ${{ secrets.PREVIEW_KEY_PASSWORD }}
+        env:
+          BUILD_TOOLS_VERSION: '35.0.1'
+
+      - name: Rename preview APKs
+        run: |
+          set -e
+          dir="app/build/outputs/apk/preview"
+          tag="${{ steps.version.outputs.tag }}"
+          mv "$dir/app-universal-preview-unsigned-signed.apk" "AniScroll-$tag.apk"
+          mv "$dir/app-arm64-v8a-preview-unsigned-signed.apk" "AniScroll-arm64-v8a-$tag.apk"
+          mv "$dir/app-armeabi-v7a-preview-unsigned-signed.apk" "AniScroll-armeabi-v7a-$tag.apk"
+          mv "$dir/app-x86-preview-unsigned-signed.apk" "AniScroll-x86-$tag.apk"
+          mv "$dir/app-x86_64-preview-unsigned-signed.apk" "AniScroll-x86_64-$tag.apk"
+
+      - name: Create preview prerelease
+        uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2.5.0
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: AniScroll Preview ${{ steps.version.outputs.tag }}
+          body: |
+            Automated AniScroll preview build.
+
+            Commit: ${{ github.sha }}
+            Preview builds are test releases and may contain unfinished changes.
+          files: |
+            AniScroll-${{ steps.version.outputs.tag }}.apk
+            AniScroll-arm64-v8a-${{ steps.version.outputs.tag }}.apk
+            AniScroll-armeabi-v7a-${{ steps.version.outputs.tag }}.apk
+            AniScroll-x86-${{ steps.version.outputs.tag }}.apk
+            AniScroll-x86_64-${{ steps.version.outputs.tag }}.apk
+          draft: false
+          prerelease: true
+          fail_on_unmatched_files: true
