@@ -72,12 +72,17 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c # v5.0.2
 
-      - name: Write client_secrets.json
-        uses: DamianReeves/write-file-action@6929a9a6d1807689191dcc8bbe62b54d70a32b42 # v1.3
-        with:
-          path: app/src/main/assets/client_secrets.json
-          contents: ${{ secrets.GOOGLE_CLIENT_SECRETS_JSON }}
-          write-mode: overwrite
+      - name: Write client_secrets.json (optional)
+        env:
+          GOOGLE_CLIENT_SECRETS_JSON: ${{ secrets.GOOGLE_CLIENT_SECRETS_JSON }}
+        run: |
+          if [ -n "$GOOGLE_CLIENT_SECRETS_JSON" ]; then
+            mkdir -p app/src/main/assets
+            printf '%s' "$GOOGLE_CLIENT_SECRETS_JSON" > app/src/main/assets/client_secrets.json
+            echo "Google Drive credentials configured."
+          else
+            echo "Google Drive credentials not configured; skipping."
+          fi
 
       - name: Clean CMake cache
         run: rm -rf app/.cxx chimahon/.cxx
