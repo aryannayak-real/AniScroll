@@ -105,22 +105,22 @@ jobs:
         run: |
           set -e
 
-          mv app/build/outputs/apk/release/app-universal-release-unsigned-signed.apk chimahon-${{ needs.get_tag.outputs.tag }}.apk
-          mv app/build/outputs/apk/release/app-arm64-v8a-release-unsigned-signed.apk chimahon-arm64-v8a-${{ needs.get_tag.outputs.tag }}.apk
-          mv app/build/outputs/apk/release/app-armeabi-v7a-release-unsigned-signed.apk chimahon-armeabi-v7a-${{ needs.get_tag.outputs.tag }}.apk
-          mv app/build/outputs/apk/release/app-x86-release-unsigned-signed.apk chimahon-x86-${{ needs.get_tag.outputs.tag }}.apk
-          mv app/build/outputs/apk/release/app-x86_64-release-unsigned-signed.apk chimahon-x86_64-${{ needs.get_tag.outputs.tag }}.apk
+          mv app/build/outputs/apk/release/app-universal-release-unsigned-signed.apk AniScroll-${{ needs.get_tag.outputs.tag }}.apk
+          mv app/build/outputs/apk/release/app-arm64-v8a-release-unsigned-signed.apk AniScroll-arm64-v8a-${{ needs.get_tag.outputs.tag }}.apk
+          mv app/build/outputs/apk/release/app-armeabi-v7a-release-unsigned-signed.apk AniScroll-armeabi-v7a-${{ needs.get_tag.outputs.tag }}.apk
+          mv app/build/outputs/apk/release/app-x86-release-unsigned-signed.apk AniScroll-x86-${{ needs.get_tag.outputs.tag }}.apk
+          mv app/build/outputs/apk/release/app-x86_64-release-unsigned-signed.apk AniScroll-x86_64-${{ needs.get_tag.outputs.tag }}.apk
 
       - name: Upload APK
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
-          name: chimahon
+          name: AniScroll
           path: |
-            chimahon-${{ needs.get_tag.outputs.tag }}.apk
-            chimahon-arm64-v8a-${{ needs.get_tag.outputs.tag }}.apk
-            chimahon-armeabi-v7a-${{ needs.get_tag.outputs.tag }}.apk
-            chimahon-x86-${{ needs.get_tag.outputs.tag }}.apk
-            chimahon-x86_64-${{ needs.get_tag.outputs.tag }}.apk
+            AniScroll-${{ needs.get_tag.outputs.tag }}.apk
+            AniScroll-arm64-v8a-${{ needs.get_tag.outputs.tag }}.apk
+            AniScroll-armeabi-v7a-${{ needs.get_tag.outputs.tag }}.apk
+            AniScroll-x86-${{ needs.get_tag.outputs.tag }}.apk
+            AniScroll-x86_64-${{ needs.get_tag.outputs.tag }}.apk
 
   release:
     name: Create GitHub Release
@@ -173,19 +173,19 @@ jobs:
         uses: geekyeggo/delete-artifact@f275313e70c08f6120db482d7a6b98377786765b # v5.1.0
         with:
           failOnError: false
-          name: chimahon
+          name: AniScroll
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2.5.0
         with:
           tag_name: ${{ needs.get_tag.outputs.tag }}
-          name: Chimahon ${{ needs.get_tag.outputs.tag }}
+          name: AniScroll ${{ needs.get_tag.outputs.tag }}
           body_path: release_notes.md
           files: |
-            chimahon-${{ needs.get_tag.outputs.tag }}.apk
-            chimahon-arm64-v8a-${{ needs.get_tag.outputs.tag }}.apk
-            chimahon-armeabi-v7a-${{ needs.get_tag.outputs.tag }}.apk
-            chimahon-x86-${{ needs.get_tag.outputs.tag }}.apk
-            chimahon-x86_64-${{ needs.get_tag.outputs.tag }}.apk
+            AniScroll-${{ needs.get_tag.outputs.tag }}.apk
+            AniScroll-arm64-v8a-${{ needs.get_tag.outputs.tag }}.apk
+            AniScroll-armeabi-v7a-${{ needs.get_tag.outputs.tag }}.apk
+            AniScroll-x86-${{ needs.get_tag.outputs.tag }}.apk
+            AniScroll-x86_64-${{ needs.get_tag.outputs.tag }}.apk
           draft: true
           prerelease: false
