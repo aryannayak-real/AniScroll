@@ -41,7 +41,7 @@ class GetApplicationReleaseTest {
                 "info",
                 "http://example.com/release_link",
                 "http://example.com/release_link.apk",
-                  preRelease = true,
+                preRelease = true,
             ),
         )
 
