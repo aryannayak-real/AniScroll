@@ -20,7 +20,7 @@
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:contentDescription="@string/widget_preview_history"
-            android:src="@drawable/ic_chimahon"
+            android:src="@drawable/aniscroll_monochrome"
             android:tint="@color/appwidget_on_surface_variant" />
 
         <TextView

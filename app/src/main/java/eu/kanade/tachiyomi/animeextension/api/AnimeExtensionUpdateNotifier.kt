@@ -38,7 +38,7 @@ class AnimeExtensionUpdateNotifier(
             }
             setSmallIcon(R.drawable.ic_extension_24dp)
             setColor(ContextCompat.getColor(context, R.color.ic_launcher))
-            setLargeIcon(BitmapFactory.decodeResource(context.resources, R.drawable.chimahon))
+            setLargeIcon(BitmapFactory.decodeResource(context.resources, R.drawable.aniscroll_logo))
             setContentIntent(NotificationReceiver.openExtensionsPendingActivity(context))
             setAutoCancel(true)
         }

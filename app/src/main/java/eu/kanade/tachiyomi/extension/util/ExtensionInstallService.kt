@@ -33,9 +33,9 @@ class ExtensionInstallService : Service() {
 
     override fun onCreate() {
         val notification = notificationBuilder(Notifications.CHANNEL_EXTENSIONS_UPDATE) {
-            setSmallIcon(R.drawable.ic_chimahon)
+            setSmallIcon(R.drawable.aniscroll_monochrome)
             setColor(ContextCompat.getColor(applicationContext, R.color.ic_launcher))
-            setLargeIcon(BitmapFactory.decodeResource(applicationContext.resources, R.drawable.chimahon))
+            setLargeIcon(BitmapFactory.decodeResource(applicationContext.resources, R.drawable.aniscroll_logo))
             setAutoCancel(false)
             setOngoing(true)
             setShowWhen(false)

@@ -114,7 +114,7 @@ private fun AppLogoOnAccent(
         contentAlignment = Alignment.Center,
     ) {
         Image(
-            provider = ImageProvider(R.drawable.ic_chimahon),
+            provider = ImageProvider(R.drawable.aniscroll_monochrome),
             contentDescription = contentDescription,
             colorFilter = ColorFilter.tint(GlanceTheme.SurfaceContainer),
             modifier = GlanceModifier.size(logoSize),

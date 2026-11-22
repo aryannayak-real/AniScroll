@@ -31,9 +31,9 @@ fun UpdatesWidgetHeader(
     onClick: Action? = null,
 ) {
     val context = LocalContext.current
-    // presentation-widget has no app R for ic_chimahon
+    // presentation-widget has no app R for aniscroll_monochrome
     val iconRes = context.resources.getIdentifier(
-        "ic_chimahon",
+        "aniscroll_monochrome",
         "drawable",
         context.packageName,
     )

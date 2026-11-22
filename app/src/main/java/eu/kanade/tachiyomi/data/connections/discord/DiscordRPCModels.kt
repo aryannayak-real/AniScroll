@@ -195,7 +195,7 @@ enum class DiscordScreen(
     @StringRes val details: Int,
     val imageUrl: String,
 ) {
-    APP(R.string.app_name, R.string.discord_status_using, CHIMAHON_IMAGE_URL),
+    APP(R.string.app_name, R.string.discord_status_using, ANISCROLL_IMAGE_URL),
     LIBRARY(R.string.label_library, R.string.discord_status_browsing, LIBRARY_IMAGE_URL),
     UPDATES(R.string.label_recent_updates, R.string.discord_status_scrolling, UPDATES_IMAGE_URL),
     HISTORY(R.string.label_recent_manga, R.string.discord_status_scrolling, HISTORY_IMAGE_URL),
@@ -207,7 +207,7 @@ enum class DiscordScreen(
 }
 
 // Constants for standard Rich Presence image urls
-private const val CHIMAHON_IMAGE_URL = "https://raw.githubusercontent.com/Chimahon/chimahon/main/app/src/main/res/drawable/chimahon.png"
+private const val ANISCROLL_IMAGE_URL = "https://raw.githubusercontent.com/aryannayak-real/AniScroll/main/app/src/main/res/drawable-nodpi/aniscroll_logo.png"
 private const val LIBRARY_IMAGE_URL = "emojis/1365262809050644591.webp?quality=lossless"
 private const val UPDATES_IMAGE_URL = "emojis/1365261957883625492.webp?quality=lossless"
 private const val HISTORY_IMAGE_URL = "emojis/1365262076787949598.webp?quality=lossless"

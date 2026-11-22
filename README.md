@@ -1,6 +1,6 @@
 <div align="center">
 
-<img width="200" height="200" src="./app/src/main/res/drawable/brand_mangabaka.png" alt="AniScroll icon" />
+<img width="200" height="200" src="./.github/readme-images/app-icon.png" alt="AniScroll icon" />
 
 <h1 align="center">AniScroll</h1>
 

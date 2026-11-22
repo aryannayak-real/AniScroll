@@ -34,7 +34,7 @@ class EHentaiUpdateNotifier(private val context: Context) {
      * Bitmap of the app for notifications.
      */
     private val notificationBitmap by lazy {
-        BitmapFactory.decodeResource(context.resources, R.drawable.chimahon)
+        BitmapFactory.decodeResource(context.resources, R.drawable.aniscroll_logo)
     }
 
     /**
@@ -97,7 +97,7 @@ class EHentaiUpdateNotifier(private val context: Context) {
         ) {
             setContentTitle(context.pluralStringResource(MR.plurals.notification_update_error, failed, failed))
             setContentText(context.stringResource(MR.strings.action_show_errors))
-            setSmallIcon(R.drawable.ic_chimahon)
+            setSmallIcon(R.drawable.aniscroll_monochrome)
             setColor(ContextCompat.getColor(context, R.color.ic_launcher))
             setLargeIcon(notificationBitmap)
 

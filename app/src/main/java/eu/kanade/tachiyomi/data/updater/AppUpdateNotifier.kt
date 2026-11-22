@@ -24,7 +24,7 @@ internal class AppUpdateNotifier(private val context: Context) {
 
     private val notificationBuilder = context.notificationBuilder(Notifications.CHANNEL_APP_UPDATE) {
         setColor(ContextCompat.getColor(context, R.color.ic_launcher))
-        setLargeIcon(BitmapFactory.decodeResource(context.resources, R.drawable.chimahon))
+        setLargeIcon(BitmapFactory.decodeResource(context.resources, R.drawable.aniscroll_logo))
     }
 
     /**
@@ -65,7 +65,7 @@ internal class AppUpdateNotifier(private val context: Context) {
         with(notificationBuilder) {
             setContentTitle(context.stringResource(MR.strings.update_check_notification_update_available))
             setContentText(release.version)
-            setSmallIcon(android.R.drawable.stat_sys_download_done)
+            setSmallIcon(R.drawable.aniscroll_monochrome)
             setContentIntent(updateIntent)
 
             clearActions()
@@ -229,7 +229,7 @@ internal class AppUpdateNotifier(private val context: Context) {
         with(notificationBuilder) {
             setContentTitle(context.stringResource(KMR.strings.update_completed))
             setContentText(context.stringResource(MR.strings.updated_version, BuildConfig.VERSION_NAME))
-            setSmallIcon(R.drawable.ic_chimahon)
+            setSmallIcon(R.drawable.aniscroll_monochrome)
             setAutoCancel(true)
             setOngoing(false)
             setProgress(0, 0, false)

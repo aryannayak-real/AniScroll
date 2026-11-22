@@ -177,7 +177,7 @@ class ScreenLookupService : Service() {
         )
 
         return notificationBuilder(Notifications.CHANNEL_COMMON) {
-            setSmallIcon(R.drawable.ic_chimahon)
+            setSmallIcon(R.drawable.aniscroll_monochrome)
             setContentTitle(this@ScreenLookupService.stringResource(MR.strings.screen_lookup_notification_title))
             setContentText(this@ScreenLookupService.stringResource(MR.strings.screen_lookup_notification_text))
             setOngoing(true)
@@ -385,7 +385,7 @@ class ScreenLookupService : Service() {
             contentDescription = this@ScreenLookupService.stringResource(MR.strings.screen_lookup_capture_button)
             addView(
                 ImageView(this@ScreenLookupService).apply {
-                    setImageResource(R.drawable.ic_chimahon)
+                    setImageResource(R.drawable.aniscroll_monochrome)
                     imageTintList = ColorStateList.valueOf(buttonIconColor(buttonColor))
                     scaleType = ImageView.ScaleType.CENTER_INSIDE
                     setPadding(14.dp, 14.dp, 14.dp, 14.dp)

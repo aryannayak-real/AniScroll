@@ -29,6 +29,12 @@
 
 - Aligned the SQLDelight dialect version with the runtime.
 
+## [1.1.7] - 2026-11-22
+
+### Changed
+
+- Replaced the legacy app icon with the new AniScroll logo across the launcher, splash screen, in-app header, widgets, and notifications.
+
 ## [Unreleased]
 
 - No unreleased changes.

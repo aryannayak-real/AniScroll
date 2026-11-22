@@ -56,7 +56,7 @@ class AnimeLibraryUpdateNotifier(
     }
 
     private val notificationBitmap by lazy {
-        BitmapFactory.decodeResource(context.resources, R.mipmap.ic_launcher)
+        BitmapFactory.decodeResource(context.resources, R.drawable.aniscroll_logo)
     }
 
     private val cancelIntent by lazy {
@@ -137,7 +137,7 @@ class AnimeLibraryUpdateNotifier(
         ) {
             setContentTitle(context.stringResource(MR.strings.notification_update_error, failed))
             setContentText(context.stringResource(MR.strings.action_show_errors))
-            setSmallIcon(R.drawable.ic_chimahon)
+            setSmallIcon(R.drawable.aniscroll_monochrome)
             setColor(ContextCompat.getColor(context, R.color.ic_launcher))
             setContentIntent(NotificationReceiver.openErrorLogPendingActivity(context, uri))
         }
@@ -169,7 +169,7 @@ class AnimeLibraryUpdateNotifier(
                 }
             }
 
-            setSmallIcon(R.drawable.ic_chimahon)
+            setSmallIcon(R.drawable.aniscroll_monochrome)
             setColor(ContextCompat.getColor(context, R.color.ic_launcher))
             setLargeIcon(notificationBitmap)
 
@@ -205,7 +205,7 @@ class AnimeLibraryUpdateNotifier(
             setContentText(description)
             setStyle(NotificationCompat.BigTextStyle().bigText(description))
 
-            setSmallIcon(R.drawable.ic_chimahon)
+            setSmallIcon(R.drawable.aniscroll_monochrome)
             setColor(ContextCompat.getColor(context, R.color.ic_launcher))
 
             if (icon != null) {

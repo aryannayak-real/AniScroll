@@ -143,7 +143,7 @@ fun WidgetHeader(
     ) {
         if (showIcon) {
             Image(
-                provider = ImageProvider(R.drawable.ic_chimahon),
+                provider = ImageProvider(R.drawable.aniscroll_monochrome),
                 contentDescription = null,
                 colorFilter = ColorFilter.tint(GlanceTheme.OnSurfaceVariant),
                 modifier = GlanceModifier.size(24.dp).cornerRadius(8.dp),
