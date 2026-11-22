@@ -78,10 +78,10 @@ class BackupRestorer(
     private var sourceMapping: Map<Long, String> = emptyMap()
     private var animeSourceMapping: Map<Long, String> = emptyMap()
 
-    suspend fun restore(uri: Uri, options: RestoreOptions) {
+    suspend fun restore(uri: Uri, options: RestoreOptions, password: CharArray? = null) {
         val startTime = System.currentTimeMillis()
 
-        restoreFromFile(uri, options)
+        restoreFromFile(uri, options, password)
 
         val time = System.currentTimeMillis() - startTime
 
@@ -96,8 +96,8 @@ class BackupRestorer(
         )
     }
 
-    private suspend fun restoreFromFile(uri: Uri, options: RestoreOptions) {
-        val backup = BackupDecoder(context).decode(uri)
+    private suspend fun restoreFromFile(uri: Uri, options: RestoreOptions, password: CharArray?) {
+        val backup = BackupDecoder(context, password).decode(uri)
 
         // Store source mapping for error messages
         val backupMaps = backup.backupSources

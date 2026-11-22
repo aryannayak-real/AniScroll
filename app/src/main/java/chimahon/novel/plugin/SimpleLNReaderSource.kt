@@ -46,6 +46,7 @@ class SimpleLNReaderSource(
     val siteUrl: String,
     private val jsCode: String,
     val codeUrl: String = "",
+    private val expectedSha256: String = "",
 ) : NovelsPageSource, NovelConfigurableSource, HttpNovelSource, eu.kanade.tachiyomi.sourcenovel.NovelFileSource {
     override val id: Long = pluginId.hashCode().toLong() and Long.MAX_VALUE
     override val name: String = pluginName
@@ -95,7 +96,12 @@ class SimpleLNReaderSource(
 
     private suspend fun ensureJsCode(): String {
         cachedJsCode?.let { return it }
+        val expected = expectedSha256.trim().lowercase()
         if (jsCode.isNotBlank()) {
+            if (expected.isNotEmpty() && sha256Hex(jsCode) != expected) {
+                logcat(LogPriority.ERROR) { "[$pluginId] Bundled JS checksum mismatch; refusing to execute" }
+                return ""
+            }
             cachedJsCode = jsCode
             return jsCode
         }
@@ -107,11 +113,24 @@ class SimpleLNReaderSource(
                 ""
             }
             if (code.isNotBlank()) {
-                cachedJsCode = code
-                return code
+                if (expected.isNotEmpty() && sha256Hex(code) != expected) {
+                    // Cached code was tampered with or belongs to a different version.
+                    // Drop it and fall back to a verified remote fetch.
+                    logcat(LogPriority.ERROR) { "[$pluginId] Cached JS checksum mismatch; deleting cache" }
+                    runCatching { localFile.delete() }
+                } else {
+                    cachedJsCode = code
+                    return code
+                }
             }
         }
         val url = codeUrl.takeIf { it.isNotBlank() } ?: return ""
+        if (expected.isEmpty()) {
+            // Fail closed: never execute freshly downloaded JS that no repository
+            // has vouched for with a checksum.
+            logcat(LogPriority.ERROR) { "[$pluginId] Refusing unverified remote JS from $url (no sha256 in catalog)" }
+            return ""
+        }
         return withContext(Dispatchers.IO) {
             try {
                 val client = Injekt.get<NetworkHelper>().client
@@ -125,17 +144,37 @@ class SimpleLNReaderSource(
                     return@withContext ""
                 }
                 val body = resp.body.string()
-                if (body.isNotBlank()) {
+                if (body.isNotBlank() && sha256Hex(body) == expected) {
                     cachedJsCode = body
                     try {
-                        localFile.writeText(body)
-                    } catch (_: Exception) {}
+                        val tmp = java.io.File(localFile.parentFile, "${localFile.name}.tmp")
+                        tmp.writeText(body)
+                        if (!tmp.renameTo(localFile)) {
+                            localFile.delete()
+                            tmp.renameTo(localFile)
+                        }
+                    } catch (e: Exception) {
+                        logcat(LogPriority.WARN, e) { "[$pluginId] Failed to cache verified JS" }
+                    }
+                    body
+                } else {
+                    logcat(LogPriority.ERROR) { "[$pluginId] Remote JS checksum mismatch; refusing to execute" }
+                    ""
                 }
-                body
             } catch (e: Exception) {
                 logcat(LogPriority.WARN, e) { "[$pluginId] fetch JS error $url" }
                 ""
             }
+        }
+    }
+
+    private fun sha256Hex(input: String): String {
+        return try {
+            java.security.MessageDigest.getInstance("SHA-256")
+                .digest(input.toByteArray(Charsets.UTF_8))
+                .joinToString("") { "%02x".format(it) }
+        } catch (_: Exception) {
+            ""
         }
     }
 

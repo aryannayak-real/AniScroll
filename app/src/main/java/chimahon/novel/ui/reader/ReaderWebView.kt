@@ -121,7 +121,9 @@ fun ReaderWebView(
                 settings.allowFileAccess = true
                 settings.allowContentAccess = true
                 settings.allowFileAccessFromFileURLs = true
-                settings.allowUniversalAccessFromFileURLs = true
+                // Local EPUBs only need same-origin file access. Universal file access
+                // would let injected script read arbitrary app files.
+                settings.allowUniversalAccessFromFileURLs = false
                 settings.javaScriptEnabled = true
                 settings.domStorageEnabled = true
                 settings.cacheMode = WebSettings.LOAD_NO_CACHE
@@ -129,7 +131,9 @@ fun ReaderWebView(
                 settings.displayZoomControls = false
                 settings.loadWithOverviewMode = false
                 settings.useWideViewPort = true
-                settings.mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
+                // Allow passive images (many sources still serve http images) but
+                // block active mixed content (scripts/XHR/iframes).
+                settings.mixedContentMode = WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE
                 isVerticalScrollBarEnabled = false
                 isHorizontalScrollBarEnabled = false
                 overScrollMode = WebView.OVER_SCROLL_NEVER

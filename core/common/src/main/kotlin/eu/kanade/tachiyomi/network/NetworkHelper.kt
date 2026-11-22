@@ -165,7 +165,26 @@ import kotlin.random.Random
                             outputFile.delete()
                             downloadedBytes = 0
                         }
+                        if (response.code == 206) {
+                            val start = parseContentRangeStart(response.header("Content-Range"))
+                            if (start != null && start != downloadedBytes) {
+                                throw IOException(
+                                    "Server resumed at byte $start but $downloadedBytes were requested",
+                                )
+                            }
+                        }
+                        val expectedTotal = if (response.code == 206) {
+                            parseContentRangeTotal(response.header("Content-Range"))
+                        } else {
+                            response.body.contentLength().takeIf { it >= 0 }
+                        }
                         saveResponseToFile(response, outputFile, downloadedBytes)
+                        val actual = outputFile.length()
+                        if (expectedTotal != null && actual != expectedTotal) {
+                            throw IOException(
+                                "Incomplete download: expected $expectedTotal bytes but got $actual",
+                            )
+                        }
                         if (response.isSuccessful) {
                             return
                         }
@@ -211,6 +230,25 @@ import kotlin.random.Random
     private fun exponentialBackoff(attempt: Int) {
         val backoffDelay = calculateExponentialBackoff(attempt)
         Thread.sleep(backoffDelay)
+    }
+
+    /** Parses the start offset from a `Content-Range: bytes 200-1000/1001` header. */
+    private fun parseContentRangeStart(value: String?): Long? {
+        return value
+            ?.substringAfter("bytes", "")
+            ?.substringAfter(' ', "")
+            ?.substringBefore('-')
+            ?.trim()
+            ?.toLongOrNull()
+    }
+
+    /** Parses the total size from a `Content-Range: bytes 200-1000/1001` header. */
+    private fun parseContentRangeTotal(value: String?): Long? {
+        return value
+            ?.substringAfter('/', "")
+            ?.trim()
+            ?.toLongOrNull()
+            ?.takeIf { it > 0 }
     }
 
     // Helper function to calculate exponential backoff with jitter

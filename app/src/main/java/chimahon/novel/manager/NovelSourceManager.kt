@@ -50,6 +50,7 @@ class NovelSourceManager(
                         siteUrl = inst.descriptor.site,
                         jsCode = "",
                         codeUrl = inst.descriptor.codeUrl,
+                        expectedSha256 = inst.descriptor.sha256,
                     ) as NovelsPageSource
                 }
                 // Local imports are always present.

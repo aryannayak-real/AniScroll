@@ -17,6 +17,7 @@ import java.io.IOException
 
 class BackupDecoder(
     private val context: Context,
+    private val password: CharArray? = null,
     private val parser: ProtoBuf = Injekt.get(),
 ) {
     /**
@@ -30,13 +31,17 @@ class BackupDecoder(
                 require(2)
             }
             val id1id2 = peeked.readShort()
-            val backupString = when (id1id2.toInt()) {
+            val decodedBytes = when (id1id2.toInt()) {
                 0x1f8b -> source.gzip().buffer() // 0x1f8b is gzip magic bytes
                 MAGIC_JSON_SIGNATURE1, MAGIC_JSON_SIGNATURE2, MAGIC_JSON_SIGNATURE3 -> {
                     throw IOException(context.stringResource(MR.strings.invalid_backup_file_json))
                 }
                 else -> source
             }.use { it.readByteArray() }
+
+            // Transparently decrypt password-protected backups. Plaintext backups
+            // pass through unchanged for backwards compatibility.
+            val backupString = eu.kanade.tachiyomi.data.backup.BackupCipher.decrypt(decodedBytes, password)
 
             try {
                 if (BackupDetector.isLegacyBackup(backupString)) {

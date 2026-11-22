@@ -6,10 +6,22 @@ import android.content.Intent
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import cafe.adriel.voyager.core.model.StateScreenModel
 import cafe.adriel.voyager.core.model.rememberScreenModel
@@ -30,6 +42,7 @@ import tachiyomi.presentation.core.components.LabeledCheckbox
 import tachiyomi.presentation.core.components.LazyColumnWithAction
 import tachiyomi.presentation.core.components.SectionCard
 import tachiyomi.presentation.core.components.material.Scaffold
+import tachiyomi.presentation.core.components.material.padding
 import tachiyomi.presentation.core.i18n.stringResource
 
 class CreateBackupScreen : Screen() {
@@ -41,6 +54,10 @@ class CreateBackupScreen : Screen() {
         val model = rememberScreenModel { CreateBackupScreenModel() }
         val state by model.state.collectAsState()
 
+        var encryptBackup by rememberSaveable { mutableStateOf(false) }
+        // Never persist a backup password in saved instance state.
+        var password by remember { mutableStateOf("") }
+
         val chooseBackupDir = rememberLauncherForActivityResult(
             contract = ActivityResultContracts.CreateDocument("application/*"),
         ) {
@@ -50,7 +67,8 @@ class CreateBackupScreen : Screen() {
                     Intent.FLAG_GRANT_READ_URI_PERMISSION or
                         Intent.FLAG_GRANT_WRITE_URI_PERMISSION,
                 )
-                model.createBackup(context, it)
+                val backupPassword = if (encryptBackup && password.isNotBlank()) password.toCharArray() else null
+                model.createBackup(context, it, backupPassword)
                 navigator.pop()
             }
         }
@@ -67,7 +85,8 @@ class CreateBackupScreen : Screen() {
             LazyColumnWithAction(
                 contentPadding = contentPadding,
                 actionLabel = stringResource(MR.strings.action_create),
-                actionEnabled = state.options.canCreate(),
+                actionEnabled = state.options.canCreate() &&
+                    (!encryptBackup || password.isNotBlank()),
                 onClickAction = {
                     if (!BackupCreateJob.isManualJobRunning(context)) {
                         try {
@@ -95,6 +114,39 @@ class CreateBackupScreen : Screen() {
                 item {
                     SectionCard(MR.strings.label_settings) {
                         Options(BackupOptions.settingsOptions, state, model)
+                    }
+                }
+
+                item {
+                    SectionCard {
+                        Text(
+                            text = stringResource(MR.strings.backup_encrypt_title),
+                            style = MaterialTheme.typography.titleSmall,
+                            modifier = Modifier.padding(bottom = MaterialTheme.padding.small),
+                        )
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = stringResource(MR.strings.backup_encrypt_toggle),
+                                modifier = Modifier.padding(vertical = MaterialTheme.padding.small),
+                            )
+                            Switch(
+                                checked = encryptBackup,
+                                onCheckedChange = { encryptBackup = it },
+                            )
+                        }
+                        if (encryptBackup) {
+                            OutlinedTextField(
+                                value = password,
+                                onValueChange = { password = it },
+                                label = { Text(stringResource(MR.strings.backup_password)) },
+                                singleLine = true,
+                                modifier = Modifier.padding(bottom = MaterialTheme.padding.small),
+                            )
+                            Text(
+                                text = stringResource(MR.strings.backup_password_warning),
+                                style = MaterialTheme.typography.bodySmall,
+                            )
+                        }
                     }
                 }
             }
@@ -130,8 +182,8 @@ private class CreateBackupScreenModel : StateScreenModel<CreateBackupScreenModel
         }
     }
 
-    fun createBackup(context: Context, uri: Uri) {
-        BackupCreateJob.startNow(context, uri, state.value.options)
+    fun createBackup(context: Context, uri: Uri, password: CharArray? = null) {
+        BackupCreateJob.startNow(context, uri, state.value.options, password)
     }
 
     @Immutable

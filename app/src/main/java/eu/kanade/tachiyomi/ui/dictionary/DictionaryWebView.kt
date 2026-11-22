@@ -40,7 +40,8 @@ internal fun prepareDictionaryWebViewShell(
         settings.allowFileAccess = true
         settings.allowContentAccess = true
         settings.allowFileAccessFromFileURLs = true
-        settings.allowUniversalAccessFromFileURLs = true
+        // Dictionaries only need same-origin local assets; block cross-origin file reads.
+        settings.allowUniversalAccessFromFileURLs = false
         settings.setSupportZoom(true)
         settings.displayZoomControls = false
         isVerticalScrollBarEnabled = false

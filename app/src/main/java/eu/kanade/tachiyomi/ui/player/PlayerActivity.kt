@@ -259,14 +259,19 @@ class PlayerActivity : BaseActivity() {
         if (intent.isYoutubeVideoIntent()) {
             player.isExiting = false
             val videoUrl = intent.getStringExtra(EXTRA_YOUTUBE_VIDEO_URL)
-            if (videoUrl != null) {
+            val parsed = videoUrl?.let { runCatching { Uri.parse(it) }.getOrNull() }
+            val host = parsed?.host?.lowercase().orEmpty()
+            val scheme = parsed?.scheme?.lowercase()
+            val trustedHost = host == "youtu.be" || host.endsWith(".youtube.com") || host == "youtube.com" ||
+                host.endsWith(".youtube-nocookie.com") || host == "youtube-nocookie.com"
+            if (videoUrl != null && (scheme == "http" || scheme == "https") && trustedHost) {
                 // Create anime and episodes
                 viewModel.loadYoutubeVideo(videoUrl)
                 setIntent(intent)
                 return
             } else {
                 toast("Failed to get youtube url")
-                logcat(LogPriority.ERROR) { "Failed to get youtube url" }
+                logcat(LogPriority.ERROR) { "Refused invalid or untrusted YouTube URL" }
                 finish()
                 return
             }
@@ -353,6 +358,11 @@ class PlayerActivity : BaseActivity() {
         val uriString = getStringExtra(EXTRA_STANDALONE_VIDEO_URL)
             ?: data?.toString()
             ?: return null
+        val uri = runCatching { Uri.parse(uriString) }.getOrNull() ?: return null
+        if (!isSafePlayableUri(uri)) {
+            logcat(LogPriority.WARN) { "Refusing unsafe external media URI: $uri" }
+            return null
+        }
         val title = getStringExtra(EXTRA_STANDALONE_VIDEO_TITLE)
             ?: data?.let { uri ->
                 runCatching { uri.getFileName(this@PlayerActivity) }.getOrNull()
@@ -365,6 +375,32 @@ class PlayerActivity : BaseActivity() {
             videoTitle = title,
             initialized = true,
         )
+    }
+
+    /**
+     * Exported player entry points accept media from other apps. Only allow
+     * schemes the player can safely render, and never let an external intent
+     * read arbitrary private files.
+     */
+    private fun isSafePlayableUri(uri: Uri): Boolean {
+        return when (uri.scheme?.lowercase()) {
+            "http", "https" -> !uri.host.isNullOrBlank()
+            "content" -> runCatching {
+                contentResolver.openAssetFileDescriptor(uri, "r")?.use { true } ?: false
+            }.getOrDefault(false)
+            "file" -> {
+                val path = uri.path ?: return false
+                val canonical = runCatching { java.io.File(path).canonicalPath }.getOrNull() ?: return false
+                val allowedRoots = listOfNotNull(
+                    filesDir,
+                    cacheDir,
+                    getExternalFilesDir(null),
+                    getExternalCacheDir(),
+                ).mapNotNull { runCatching { it.canonicalPath }.getOrNull() }
+                allowedRoots.any { canonical == it || canonical.startsWith(it + java.io.File.separator) }
+            }
+            else -> false
+        }
     }
 
     @SuppressLint("ClickableViewAccessibility")

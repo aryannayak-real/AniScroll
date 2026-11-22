@@ -4,10 +4,12 @@ import android.content.Context
 import android.net.Uri
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
@@ -22,6 +24,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.core.net.toUri
 import cafe.adriel.voyager.core.model.StateScreenModel
 import cafe.adriel.voyager.core.model.rememberScreenModel
+import cafe.adriel.voyager.core.model.screenModelScope
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import eu.kanade.presentation.components.AppBar
@@ -31,7 +34,9 @@ import eu.kanade.tachiyomi.data.backup.BackupFileValidator
 import eu.kanade.tachiyomi.data.backup.restore.BackupRestoreJob
 import eu.kanade.tachiyomi.data.backup.restore.RestoreOptions
 import eu.kanade.tachiyomi.util.system.DeviceUtil
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.LabeledCheckbox
 import tachiyomi.presentation.core.components.LazyColumnWithAction
@@ -88,6 +93,18 @@ class RestoreBackupScreen(
                                 )
                             }
                         }
+                    }
+                }
+
+                item {
+                    SectionCard {
+                        OutlinedTextField(
+                            value = state.password,
+                            onValueChange = model::setPassword,
+                            label = { Text(stringResource(MR.strings.backup_password_if_encrypted)) },
+                            singleLine = true,
+                            modifier = Modifier.fillMaxWidth(),
+                        )
                     }
                 }
 
@@ -170,7 +187,9 @@ private class RestoreBackupScreenModel(
 ) : StateScreenModel<RestoreBackupScreenModel.State>(State()) {
 
     init {
-        validate(uri.toUri())
+        // Decoding a backup (and PBKDF2 for encrypted files) is expensive and
+        // must never run on the main thread.
+        validateAsync(uri.toUri())
     }
 
     fun toggle(setter: (RestoreOptions, Boolean) -> RestoreOptions, enabled: Boolean) {
@@ -181,17 +200,39 @@ private class RestoreBackupScreenModel(
         }
     }
 
+    fun setPassword(value: String) {
+        mutableState.update { it.copy(password = value) }
+        if (!state.value.canRestore && value.isNotBlank()) {
+            val password = value.toCharArray()
+            validateAsync(uri.toUri(), password)
+        }
+    }
+
     fun startRestore() {
+        val password = state.value.password
+            .takeIf { it.isNotBlank() }
+            ?.toCharArray()
         BackupRestoreJob.start(
             context = context,
             uri = uri.toUri(),
             options = state.value.options,
+            password = password,
         )
     }
 
-    private fun validate(uri: Uri) {
+    private fun validateAsync(uri: Uri, password: CharArray? = null) {
+        screenModelScope.launch(Dispatchers.IO) {
+            try {
+                validate(uri, password)
+            } finally {
+                password?.fill('\u0000')
+            }
+        }
+    }
+
+    private fun validate(uri: Uri, password: CharArray? = null) {
         val results = try {
-            BackupFileValidator(context).validate(uri)
+            BackupFileValidator(context).validate(uri, password)
         } catch (e: Exception) {
             setError(
                 error = InvalidRestore(uri, e.message.toString()),
@@ -225,6 +266,7 @@ private class RestoreBackupScreenModel(
         val error: Any? = null,
         val canRestore: Boolean = false,
         val options: RestoreOptions = RestoreOptions(),
+        val password: String = "",
     )
 }
 

@@ -60,6 +60,7 @@ import java.util.Locale
 class BackupCreator(
     private val context: Context,
     private val isAutoBackup: Boolean,
+    private val password: CharArray? = null,
 
     private val parser: ProtoBuf = Injekt.get(),
     private val getFavorites: GetFavorites = Injekt.get(),
@@ -163,6 +164,11 @@ class BackupCreator(
             if (byteArray.isEmpty()) {
                 throw IllegalStateException(context.stringResource(MR.strings.empty_backup_error))
             }
+            // Encrypt the protobuf payload before gzip when a password is supplied.
+            // Legacy/unencrypted backups remain readable by BackupCipher.decrypt().
+            val payload = password?.takeIf { it.isNotEmpty() }
+                ?.let { eu.kanade.tachiyomi.data.backup.BackupCipher.encrypt(byteArray, it) }
+                ?: byteArray
 
             file.openOutputStream()
                 .also {
@@ -170,12 +176,12 @@ class BackupCreator(
                     (it as? FileOutputStream)?.channel?.truncate(0)
                 }
                 .sink().gzip().buffer().use {
-                    it.write(byteArray)
+                    it.write(payload)
                 }
             val fileUri = file.uri
 
             // Make sure it's a valid backup file
-            BackupFileValidator(context).validate(fileUri)
+            BackupFileValidator(context).validate(fileUri, password)
 
             if (isAutoBackup) {
                 backupPreferences.lastAutoBackupTimestamp().set(Instant.now().toEpochMilli())

@@ -70,6 +70,19 @@ Whether you're discovering new manga, following your favourite anime, reading no
 
 ---
 
+## 🔒 Security & Reliability
+
+AniScroll treats source configuration, backups, and external media as untrusted input.
+
+- **Encrypted Backups**: Optionally protect backups with a password using AES-256-GCM and PBKDF2 key derivation. Legacy unencrypted backups remain supported. Lost passwords cannot be recovered.
+- **Plugin Integrity Checks**: Novel source plugins are verified against repository-provided SHA-256 checksums before execution; unverified remote JavaScript is refused.
+- **Hardened WebViews**: Reader and dictionary WebViews disable universal file-origin access, restrict active mixed content, and enable Safe Browsing.
+- **Strict Network Trust**: Release builds trust only system certificate authorities. Debug builds may additionally trust user-installed CAs for local proxies.
+- **Validated External Media**: The exported video player accepts only supported URI schemes and readable content, and restricts YouTube intents to trusted hosts.
+- **Download Integrity**: Resumed downloads validate server range offsets and final file sizes before being treated as complete.
+
+---
+
 ## 🛠️ Core Features (Inherited from Upstream)
 
 AniScroll builds upon the established Mihon and Komikku ecosystem, retaining the core features that make these projects powerful manga management and reading applications.
@@ -86,7 +99,7 @@ AniScroll builds upon the established Mihon and Komikku ecosystem, retaining the
 - **Related Suggestions**: Discover related titles and recommendations where supported by the source.
 - **Dynamic Theming**: Customize the interface with themes and colors that can adapt to manga cover artwork.
 - **External Tracking**: Connect supported tracking services to synchronize reading progress.
-- **Backup & Restore**: Protect your library and reading progress through local and supported cloud backup options.
+- **Backup & Restore**: Protect your library and reading progress through local or supported cloud backups, including optional password encryption.
 - **Reader Customization**: Configure reading direction, navigation, display behaviour, and other reader preferences.
 
 ---

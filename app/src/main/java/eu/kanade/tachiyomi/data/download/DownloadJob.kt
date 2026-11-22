@@ -58,34 +58,39 @@ class DownloadJob(private val context: Context, workerParams: WorkerParameters) 
     }
 
     override suspend fun doWork(): Result {
-        var networkCheck = checkNetworkState(
-            applicationContext.activeNetworkState(),
-            downloadPreferences.downloadOnlyOverWifi().get(),
-        )
-        var active = networkCheck && downloadManager.downloaderStart()
-
-        if (!active) {
-            return Result.failure()
-        }
-
-        setForegroundSafely()
-
-        coroutineScope {
-            combineTransform(
-                applicationContext.networkStateFlow(),
-                downloadPreferences.downloadOnlyOverWifi().changes(),
-                transform = { a, b -> emit(checkNetworkState(a, b)) },
+        running.set(true)
+        try {
+            var networkCheck = checkNetworkState(
+                applicationContext.activeNetworkState(),
+                downloadPreferences.downloadOnlyOverWifi().get(),
             )
-                .onEach { networkCheck = it }
-                .launchIn(this)
-        }
+            var active = networkCheck && downloadManager.downloaderStart()
 
-        // Keep the worker running when needed
-        while (active) {
-            active = !isStopped && downloadManager.isRunning && networkCheck
-        }
+            if (!active) {
+                return Result.failure()
+            }
 
-        return Result.success()
+            setForegroundSafely()
+
+            coroutineScope {
+                combineTransform(
+                    applicationContext.networkStateFlow(),
+                    downloadPreferences.downloadOnlyOverWifi().changes(),
+                    transform = { a, b -> emit(checkNetworkState(a, b)) },
+                )
+                    .onEach { networkCheck = it }
+                    .launchIn(this)
+            }
+
+            // Keep the worker running when needed
+            while (active) {
+                active = !isStopped && downloadManager.isRunning && networkCheck
+            }
+
+            return Result.success()
+        } finally {
+            running.set(false)
+        }
     }
 
     private fun checkNetworkState(state: NetworkState, requireWifi: Boolean): Boolean {
@@ -106,6 +111,10 @@ class DownloadJob(private val context: Context, workerParams: WorkerParameters) 
     companion object {
         private const val TAG = "Downloader"
 
+        // Non-blocking running state. WorkManager's synchronous getWorkInfos...get()
+        // can block the calling thread (often the main thread) for a long time.
+        private val running = java.util.concurrent.atomic.AtomicBoolean(false)
+
         fun start(context: Context) {
             val request = OneTimeWorkRequestBuilder<DownloadJob>()
                 .addTag(TAG)
@@ -119,12 +128,7 @@ class DownloadJob(private val context: Context, workerParams: WorkerParameters) 
                 .cancelUniqueWork(TAG)
         }
 
-        fun isRunning(context: Context): Boolean {
-            return WorkManager.getInstance(context)
-                .getWorkInfosForUniqueWork(TAG)
-                .get()
-                .let { list -> list.count { it.state == WorkInfo.State.RUNNING } == 1 }
-        }
+        fun isRunning(context: Context): Boolean = running.get()
 
         fun isRunningFlow(context: Context): Flow<Boolean> {
             return WorkManager.getInstance(context)

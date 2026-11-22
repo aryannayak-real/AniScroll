@@ -20,7 +20,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
@@ -43,7 +42,6 @@ import eu.kanade.presentation.more.settings.screen.advanced.ClearDatabaseScreen
 import eu.kanade.presentation.more.settings.screen.advanced.ClearNovelDatabaseScreen
 import eu.kanade.presentation.more.settings.screen.debug.DebugInfoScreen
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.core.security.SecurityPreferences
 import eu.kanade.tachiyomi.data.download.DownloadCache
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.library.MetadataUpdateJob
@@ -800,7 +798,6 @@ object SettingsAdvancedScreen : SearchableSettings {
         val sourcePreferences = remember { Injekt.get<SourcePreferences>() }
         val exhPreferences = remember { Injekt.get<ExhPreferences>() }
         val delegateSourcePreferences = remember { Injekt.get<DelegateSourcePreferences>() }
-        val securityPreferences = remember { Injekt.get<SecurityPreferences>() }
         return Preference.PreferenceGroup(
             title = stringResource(SYMR.strings.developer_tools),
             preferenceItems = persistentListOf(
@@ -836,55 +833,6 @@ object SettingsAdvancedScreen : SearchableSettings {
                     title = stringResource(SYMR.strings.log_level),
                     subtitle = stringResource(SYMR.strings.log_level_summary),
                 ),
-                run {
-                    var enableEncryptDatabase by rememberSaveable { mutableStateOf(false) }
-
-                    if (enableEncryptDatabase) {
-                        val dismiss = { enableEncryptDatabase = false }
-                        AlertDialog(
-                            onDismissRequest = dismiss,
-                            title = { Text(text = stringResource(SYMR.strings.encrypt_database)) },
-                            text = {
-                                Text(
-                                    text = remember {
-                                        HtmlCompat.fromHtml(
-                                            context.stringResource(SYMR.strings.encrypt_database_message),
-                                            HtmlCompat.FROM_HTML_MODE_COMPACT,
-                                        ).toAnnotatedString()
-                                    },
-                                )
-                            },
-                            dismissButton = {
-                                TextButton(onClick = dismiss) {
-                                    Text(text = stringResource(MR.strings.action_cancel))
-                                }
-                            },
-                            confirmButton = {
-                                TextButton(
-                                    onClick = {
-                                        dismiss()
-                                        securityPreferences.encryptDatabase().set(true)
-                                    },
-                                ) {
-                                    Text(text = stringResource(MR.strings.action_ok))
-                                }
-                            },
-                        )
-                    }
-                    Preference.PreferenceItem.SwitchPreference(
-                        preference = securityPreferences.encryptDatabase(),
-                        title = stringResource(SYMR.strings.encrypt_database),
-                        subtitle = stringResource(SYMR.strings.encrypt_database_subtitle),
-                        onValueChanged = {
-                            if (it) {
-                                enableEncryptDatabase = true
-                                false
-                            } else {
-                                true
-                            }
-                        },
-                    )
-                },
                 Preference.PreferenceItem.TextPreference(
                     title = stringResource(SYMR.strings.open_debug_menu),
                     subtitle = remember {

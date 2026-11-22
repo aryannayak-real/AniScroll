@@ -17,6 +17,7 @@ import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.data.backup.BackupNotifier
+import eu.kanade.tachiyomi.data.backup.BackupPasswordStore
 import eu.kanade.tachiyomi.data.backup.restore.BackupRestoreJob
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.util.system.cancelNotification
@@ -25,7 +26,9 @@ import eu.kanade.tachiyomi.util.system.setForegroundSafely
 import eu.kanade.tachiyomi.util.system.workManager
 import exh.util.WorkerUtil
 import logcat.LogPriority
+import tachiyomi.core.common.i18n.stringResource
 import tachiyomi.core.common.util.system.logcat
+import tachiyomi.i18n.MR
 import tachiyomi.domain.backup.service.BackupPreferences
 import tachiyomi.domain.storage.service.StorageManager
 import uy.kohesive.injekt.Injekt
@@ -50,9 +53,19 @@ class BackupCreateJob(private val context: Context, workerParams: WorkerParamete
 
         val options = inputData.getBooleanArray(OPTIONS_KEY)?.let { BackupOptions.fromBooleanArray(it) }
             ?: BackupOptions()
+        val passwordToken = inputData.getString(PASSWORD_TOKEN_KEY).orEmpty()
+        val password = BackupPasswordStore.take(passwordToken)
+        if (passwordToken.isNotEmpty() && password == null) {
+            // Fail closed: never silently create an unencrypted backup when the
+            // user explicitly requested encryption.
+            logcat(LogPriority.ERROR) { "Backup password expired before the job started" }
+            if (!isAutoBackup) notifier.showBackupError(context.stringResource(MR.strings.backup_password_expired))
+            context.cancelNotification(Notifications.ID_BACKUP_PROGRESS)
+            return Result.failure()
+        }
 
         return try {
-            val location = BackupCreator(context, isAutoBackup).backup(uri, options)
+            val location = BackupCreator(context, isAutoBackup, password).backup(uri, options)
             if (!isAutoBackup) {
                 notifier.showBackupComplete(UniFile.fromUri(context, location.toUri())!!)
             }
@@ -62,6 +75,7 @@ class BackupCreateJob(private val context: Context, workerParams: WorkerParamete
             if (!isAutoBackup) notifier.showBackupError(e.message)
             Result.failure()
         } finally {
+            BackupPasswordStore.discard(password)
             context.cancelNotification(Notifications.ID_BACKUP_PROGRESS)
         }
     }
@@ -114,11 +128,15 @@ class BackupCreateJob(private val context: Context, workerParams: WorkerParamete
             }
         }
 
-        fun startNow(context: Context, uri: Uri, options: BackupOptions) {
+        fun startNow(context: Context, uri: Uri, options: BackupOptions, password: CharArray? = null) {
+            val passwordToken = password
+                ?.takeIf { it.isNotEmpty() }
+                ?.let { BackupPasswordStore.register(it) }
             val inputData = workDataOf(
                 IS_AUTO_BACKUP_KEY to false,
                 LOCATION_URI_KEY to uri.toString(),
                 OPTIONS_KEY to options.asBooleanArray(),
+                PASSWORD_TOKEN_KEY to (passwordToken ?: ""),
             )
             val request = OneTimeWorkRequestBuilder<BackupCreateJob>()
                 .addTag(TAG_MANUAL)
@@ -147,3 +165,4 @@ private const val TAG_MANUAL = "$TAG_AUTO:manual"
 private const val IS_AUTO_BACKUP_KEY = "is_auto_backup" // Boolean
 private const val LOCATION_URI_KEY = "location_uri" // String
 private const val OPTIONS_KEY = "options" // BooleanArray
+private const val PASSWORD_TOKEN_KEY = "password_token" // String

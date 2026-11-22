@@ -227,14 +227,17 @@ class App : Application(), DefaultLifecycleObserver, SingletonImageLoader.Factor
         initializeMigrator()
 
         // Chimahon -->
-        chimahon.novel.data.NovelMigration.migrateOldBooks(this)
         // Public local-novels root (manga <base>/local/ mirror); readers resolve it.
         BookStorage.localBooksRoot = LocalNovelFiles.publicRoot(this)
         val dictionariesDir = File(getExternalFilesDir(null), "dictionaries")
-        chimahon.DictionaryRepository.migrateFlatDictionaries(dictionariesDir)
-        // One-time, off the main thread: record the kinds of entries each dictionary serves and drop
-        // the duplicate folder copies older builds made. It writes a marker and never runs again.
+        // These migrations touch potentially large directory trees. Run them on
+        // IO instead of blocking the first frame of the process.
         scope.launch(Dispatchers.IO) {
+            chimahon.novel.data.NovelMigration.migrateOldBooks(this@App)
+            chimahon.DictionaryRepository.migrateFlatDictionaries(dictionariesDir)
+            // One-time: record the kinds of entries each dictionary serves and drop
+            // the duplicate folder copies older builds made. It writes a marker and
+            // never runs again.
             chimahon.DictionaryRepository.ensureDictionaryTypes(dictionariesDir)
         }
         // Chimahon <--

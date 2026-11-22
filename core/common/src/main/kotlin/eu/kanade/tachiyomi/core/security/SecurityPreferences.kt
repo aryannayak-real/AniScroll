@@ -24,8 +24,6 @@ class SecurityPreferences(
 
     fun authenticatorDays() = this.preferenceStore.getInt("biometric_days", 0x7F)
 
-    fun encryptDatabase() = this.preferenceStore.getBoolean(Preference.appStateKey("encrypt_database"), false)
-
     fun sqlPassword() = this.preferenceStore.getString(Preference.appStateKey("sql_password"), "")
 
     fun passwordProtectDownloads() = preferenceStore.getBoolean(

@@ -60,9 +60,13 @@ class NovelPluginManager(
             tmp.writeText(jsonCodec.encodeToString(installed))
             if (!tmp.renameTo(registryFile)) {
                 registryFile.delete()
-                tmp.renameTo(registryFile)
+                if (!tmp.renameTo(registryFile)) {
+                    logcat(LogPriority.ERROR) { "Failed to persist novel plugin registry" }
+                }
             }
-        } catch (_: Exception) {}
+        } catch (e: Exception) {
+            logcat(LogPriority.ERROR, e) { "Failed to persist novel plugin registry" }
+        }
         // Dual-write until the registry file is deleted: the DB is authoritative.
         runCatching {
             val store = Injekt.get<NovelPluginStoreRepository>()
@@ -141,9 +145,13 @@ class NovelPluginManager(
             tmp.writeText(jsonCodec.encodeToString(CachedPluginIndex(System.currentTimeMillis(), plugins)))
             if (!tmp.renameTo(file)) {
                 file.delete()
-                tmp.renameTo(file)
+                if (!tmp.renameTo(file)) {
+                    logcat(LogPriority.WARN) { "Failed to persist plugin index cache" }
+                }
             }
-        } catch (_: Exception) {}
+        } catch (e: Exception) {
+            logcat(LogPriority.WARN, e) { "Failed to persist plugin index cache" }
+        }
     }
 
     private fun loadAllCachedAvailable(): List<NovelPluginDescriptor> {
@@ -201,6 +209,7 @@ class NovelPluginManager(
                 siteUrl = desc.site,
                 jsCode = "",
                 codeUrl = desc.codeUrl,
+                expectedSha256 = desc.sha256,
             ) as eu.kanade.tachiyomi.sourcenovel.NovelsPageSource
         }
         _catalog.value = NovelPluginCatalog(
@@ -340,39 +349,66 @@ class NovelPluginManager(
         refresh()
     }
 
-    suspend fun install(pluginId: String) = mutex.withLock {
-        val desc = _catalog.value.available.find { it.id == pluginId } ?: return@withLock
+    suspend fun install(pluginId: String) {
+        val desc = mutex.withLock {
+            _catalog.value.available.find { it.id == pluginId }
+        } ?: return
+
+        // Fetch and verify outside the mutex so a slow/hostile CDN cannot block
+        // catalog refreshes or other installs.
         if (desc.codeUrl.isNotBlank()) {
-            try {
+            val code = try {
                 val client = Injekt.get<NetworkHelper>().client
                 val req = okhttp3.Request.Builder().url(desc.codeUrl)
                     .cacheControl(okhttp3.CacheControl.FORCE_NETWORK)
                     .header("User-Agent", "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Mobile Safari/537.36")
                     .build()
                 val resp = client.newCall(req).execute()
-                if (!resp.isSuccessful) return@withLock
-                if (resp.body.contentLength() > MAX_PLUGIN_BYTES) return@withLock
-                val code = resp.body.string()
-                if (code.isBlank() || code.length > MAX_PLUGIN_BYTES) return@withLock
-                if (desc.sha256.isNotBlank() && sha256Hex(code) != desc.sha256) {
-                    logcat(LogPriority.WARN) { "Checksum mismatch for novel plugin $pluginId, refusing install" }
-                    return@withLock
+                if (!resp.isSuccessful) {
+                    logcat(LogPriority.WARN) { "Novel plugin $pluginId install failed: HTTP ${resp.code}" }
+                    return
                 }
-                java.io.File(pluginsDir, "${desc.id}.js").writeText(code)
-            } catch (_: Exception) {
-                return@withLock
+                if (resp.body.contentLength() > MAX_PLUGIN_BYTES) return
+                resp.body.string()
+            } catch (e: Exception) {
+                logcat(LogPriority.WARN, e) { "Novel plugin $pluginId install failed while downloading" }
+                return
+            }
+            if (code.isBlank() || code.length > MAX_PLUGIN_BYTES) return
+            if (desc.sha256.isBlank()) {
+                logcat(LogPriority.ERROR) { "Refusing novel plugin $pluginId: repository supplied no sha256" }
+                return
+            }
+            if (sha256Hex(code) != desc.sha256) {
+                logcat(LogPriority.WARN) { "Checksum mismatch for novel plugin $pluginId, refusing install" }
+                return
+            }
+            try {
+                val target = java.io.File(pluginsDir, "${desc.id}.js")
+                val tmp = java.io.File(pluginsDir, "${desc.id}.js.tmp")
+                tmp.writeText(code)
+                if (!tmp.renameTo(target)) {
+                    target.delete()
+                    tmp.renameTo(target)
+                }
+            } catch (e: Exception) {
+                logcat(LogPriority.WARN, e) { "Failed to store novel plugin $pluginId" }
+                return
             }
         }
-        val currentInstalled = _catalog.value.installed.toMutableList()
-        val entry = InstalledNovelPlugin(desc, desc.codeUrl)
-        val existingIndex = currentInstalled.indexOfFirst { it.descriptor.id == pluginId }
-        if (existingIndex >= 0) {
-            currentInstalled[existingIndex] = entry
-        } else {
-            currentInstalled.add(entry)
+
+        mutex.withLock {
+            val currentInstalled = _catalog.value.installed.toMutableList()
+            val entry = InstalledNovelPlugin(desc, desc.codeUrl)
+            val existingIndex = currentInstalled.indexOfFirst { it.descriptor.id == pluginId }
+            if (existingIndex >= 0) {
+                currentInstalled[existingIndex] = entry
+            } else {
+                currentInstalled.add(entry)
+            }
+            _catalog.value = _catalog.value.copy(installed = currentInstalled)
+            persistInstalledRegistry(currentInstalled)
         }
-        _catalog.value = _catalog.value.copy(installed = currentInstalled)
-        persistInstalledRegistry(currentInstalled)
     }
 
     suspend fun uninstall(pluginId: String) = mutex.withLock {
@@ -406,6 +442,7 @@ class NovelPluginManager(
             siteUrl = descriptor.site,
             jsCode = code,
             codeUrl = descriptor.codeUrl,
+            expectedSha256 = descriptor.sha256,
         )
     }
 }

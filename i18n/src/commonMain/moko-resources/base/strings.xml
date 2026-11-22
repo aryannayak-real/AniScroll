@@ -908,6 +908,12 @@
     <string name="restore_completed">Restore completed</string>
     <string name="restore_duration">%1$02d min, %2$02d sec</string>
     <string name="backup_in_progress">Backup is already in progress</string>
+    <string name="backup_encrypt_title">Backup encryption</string>
+    <string name="backup_encrypt_toggle">Encrypt with password</string>
+    <string name="backup_password">Password</string>
+    <string name="backup_password_warning">Use a long, unique password. It cannot be recovered if lost.</string>
+    <string name="backup_password_if_encrypted">Backup password (if encrypted)</string>
+    <string name="backup_password_expired">Backup password is no longer available. Please try again.</string>
     <string name="backup_choice">What do you want to backup?</string>
     <string name="app_settings">App settings</string>
     <string name="source_settings">Source settings</string>
