@@ -45,7 +45,10 @@ jobs:
         uses: gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c
 
       - name: Run unit tests
-        run: ./gradlew test --stacktrace
+        # Run only the debug variant. The plain `test` task compiles every
+        # variant, including the benchmark variant, which runs the CI runner
+        # out of memory before any tests execute.
+        run: ./gradlew testDebugUnitTest --stacktrace
 
       - name: Upload test reports
         if: always()
