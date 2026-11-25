@@ -9,10 +9,13 @@
 [![GitHub downloads](https://img.shields.io/github/downloads/aryannayak-real/AniScroll/latest/total?label=Latest%20Downloads&labelColor=27303D&color=0D1111&logo=github&logoColor=FFFFFF&style=flat)](https://github.com/aryannayak-real/AniScroll/releases/latest)
 [![GitHub downloads](https://img.shields.io/github/downloads/aryannayak-real/AniScroll/total?label=Total%20Downloads&labelColor=27303D&color=0D1111&logo=github&logoColor=FFFFFF&style=flat)](https://github.com/aryannayak-real/AniScroll/releases)
 [![GitHub stars](https://img.shields.io/github/stars/aryannayak-real/AniScroll?style=flat&logo=github)](https://github.com/aryannayak-real/AniScroll/stargazers)
+[![Website](https://img.shields.io/badge/Website-aniscroll--website-FF4B4B?style=flat)](https://aryannayak-real.github.io/aniscroll-website/)
 
 ---
 
 AniScroll is an open-source Android application built around the Mihon ecosystem, bringing manga, anime, and novel reading together in one place.
+
+🌐 **Official website:** [aryannayak-real.github.io/aniscroll-website](https://aryannayak-real.github.io/aniscroll-website/) — screenshots, download links, feature notes, and FAQ.
 
 Inspired by the immersion-focused capabilities of Chimahon, AniScroll combines a powerful manga reading experience with extensive source support, anime integration, novel reading, and language-learning tools.
 
