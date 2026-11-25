@@ -55,7 +55,9 @@ import chimahon.anki.AnkiCardCreator
 import chimahon.anki.AnkiDroidBridge
 import chimahon.anki.AnkiResult
 import chimahon.dictionary.DictionaryType
+import chimahon.dictionary.OnlineDictionary
 import chimahon.dictionary.scanDictionaryFolders
+import chimahon.hasLookupSources
 import eu.kanade.domain.ui.UiPreferences
 import eu.kanade.presentation.components.SearchHistoryRow
 import eu.kanade.presentation.util.Tab
@@ -521,7 +523,9 @@ data object DictionaryTab : Tab {
             // Warm up the native session in the background
             launch(Dispatchers.IO) {
                 val paths = getDictionaryPaths(context, activeProfile)
-                sessionManager.warmUp(paths)
+                if (paths.hasLookupSources) {
+                    sessionManager.warmUp(paths)
+                }
             }
         }
 
@@ -802,12 +806,25 @@ data object DictionaryTab : Tab {
 
             val dictionaryPaths = getDictionaryPaths(context, activeProfile)
 
-            if (dictionaryPaths.termPaths.isEmpty() && dictionaryPaths.freqPaths.isEmpty() && dictionaryPaths.pitchPaths.isEmpty()) {
+            if (!dictionaryPaths.hasLookupSources) {
+                val onlineEnabled = Injekt.get<DictionaryPreferences>().onlineDictionaryEnabled().get()
+                if (onlineEnabled) {
+                    val online = OnlineDictionary.lookup(query, activeProfile.languageCode)
+                    return@withContext LookupUiResult(
+                        results = orderLookupResultsForDisplay(online.results, activeProfile, context),
+                        styles = emptyList(),
+                        mediaDataUris = emptyMap(),
+                        error = online.error,
+                        diagnostics = null,
+                        debugDumpDir = null,
+                    )
+                }
                 return@withContext LookupUiResult(
                     results = emptyList(),
                     styles = emptyList(),
                     mediaDataUris = emptyMap(),
-                    error = "No imported dictionaries found. Import one in Settings > Dictionary.",
+                    error = "No imported dictionaries found. Import one in Settings > Dictionary, " +
+                        "or enable online dictionary fallback.",
                     diagnostics = null,
                     debugDumpDir = null,
                 )

@@ -6,6 +6,7 @@ import android.util.Log
 import chimahon.dictionary.DICTIONARY_TYPES_MARKER
 import chimahon.dictionary.DictionaryCommitter
 import chimahon.dictionary.DictionaryType
+import chimahon.dictionary.OnlineDictionary
 import chimahon.dictionary.ko.KoreanAnalyzerDeinflector
 import chimahon.dictionary.ko.KoreanParserMode
 import chimahon.dictionary.probeDictionaryTypes
@@ -22,6 +23,7 @@ import java.util.LinkedHashMap
 class DictionaryRepository(
     private val externalFilesDir: File?,
     private val koreanParserMode: () -> String = { KoreanParserMode.LEGACY },
+    private val onlineDictionaryEnabled: () -> Boolean = { false },
 ) {
     private var session: Long? = null
     val lookupSession: Long? get() = session
@@ -39,6 +41,7 @@ class DictionaryRepository(
      */
     @Synchronized
     fun warmUp(paths: DictionaryPaths, profileId: String = "") {
+        if (!paths.hasAnySources) return
         val activeSession = session ?: HoshiDicts.createLookupObject().also { session = it }
 
         val pathsChanged = paths != configuredPaths
@@ -61,6 +64,25 @@ class DictionaryRepository(
     @Synchronized
     fun lookup(query: String, paths: DictionaryPaths, languageCode: String = ""): LookupResult2 {
         val t0 = SystemClock.elapsedRealtime()
+
+        if (!paths.hasLookupSources) {
+            if (onlineDictionaryEnabled()) {
+                val online = OnlineDictionary.lookup(query, languageCode)
+                return LookupResult2(
+                    results = online.results,
+                    styles = emptyList(),
+                    mediaDataUris = emptyMap(),
+                    error = online.error,
+                )
+            }
+            return LookupResult2(
+                results = emptyList(),
+                styles = emptyList(),
+                mediaDataUris = emptyMap(),
+                error = "No imported dictionaries found. Import one in Settings > Dictionary, " +
+                    "or enable online dictionary fallback.",
+            )
+        }
 
         warmUp(paths)
 

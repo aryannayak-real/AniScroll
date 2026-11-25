@@ -120,6 +120,9 @@ class DictionaryPreferences(
 
     fun customCss() = preferenceStore.getString("pref_dictionary_custom_css", "")
 
+    /** Use the online dictionary fallback when no offline dictionaries are imported. */
+    fun onlineDictionaryEnabled() = preferenceStore.getBoolean("pref_dict_online_enabled", true)
+
     // -------------------------------------------------------------------------
     // Profile storage (raw pref keys — consumed by AnkiProfileStore and settings UI)
     // -------------------------------------------------------------------------

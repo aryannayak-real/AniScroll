@@ -288,6 +288,7 @@ class AppModule(val app: Application) : InjektModule {
             DictionaryRepository(
                 externalFilesDir = app.getExternalFilesDir(null),
                 koreanParserMode = { dictionaryPreferences.koreanParserMode().get() },
+                onlineDictionaryEnabled = { dictionaryPreferences.onlineDictionaryEnabled().get() },
             )
         }
         addSingletonFactory { chimahon.novel.plugin.NovelPluginManager(get()) }

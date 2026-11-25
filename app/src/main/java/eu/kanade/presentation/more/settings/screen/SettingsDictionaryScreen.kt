@@ -1430,6 +1430,12 @@ object SettingsDictionaryScreen : SearchableSettings {
         return Preference.PreferenceGroup(
             title = stringResource(MR.strings.pref_dict_imported_list),
             preferenceItems = persistentListOf(
+                Preference.PreferenceItem.SwitchPreference(
+                    preference = dictionaryPreferences.onlineDictionaryEnabled(),
+                    title = "Online dictionary (no import needed)",
+                    subtitle = "Jisho for Japanese; Wiktionary for Chinese, Korean, and others. " +
+                        "Queries are sent to those sites.",
+                ),
                 Preference.PreferenceItem.CustomPreference(
                     title = stringResource(MR.strings.pref_dict_imported_list),
                     content = {

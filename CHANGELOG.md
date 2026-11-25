@@ -37,4 +37,9 @@
 
 ## [Unreleased]
 
-- No unreleased changes.
+## [1.1.8] - 2026-11-25
+
+### Added
+
+- Online dictionary fallback when no offline dictionary is imported: Jisho/JMdict for Japanese and Wiktionary for Chinese, Korean, and other languages. Offline ZIP dictionary imports remain available.
+- Simplified Chinese lookups follow the traditional form on Wiktionary when a page only contains a character redirect.

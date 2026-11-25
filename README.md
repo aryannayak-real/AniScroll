@@ -40,6 +40,7 @@ Whether you're discovering new manga, following your favourite anime, reading no
 ### 🔍 Native Dictionary Lookup
 
 - **Dictionary Management**: Import and manage dictionary files directly inside the application without requiring a separate dictionary application.
+- **Online Fallback**: Search without importing a dictionary first. Japanese uses Jisho/JMdict, while Chinese, Korean, and other languages use Wiktionary. Queries are sent to those sites and the fallback can be disabled in settings.
 - **Multi-Language Dictionaries**: Work with dictionary data for Japanese, Chinese, Korean, and other supported languages.
 - **Recursive Lookups**: Search words inside dictionary definitions to explore unfamiliar vocabulary without leaving the current lookup.
 - **Dictionary Popup**: Access vocabulary information through an integrated lookup interface while reading supported content.
