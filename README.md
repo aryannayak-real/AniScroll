@@ -32,7 +32,6 @@ Whether you are discovering new manga, following your favourite anime, reading n
 | | |
 | --- | --- |
 | **Platform** | Android 8.0+ (API 26) |
-| **Application ID** | `app.chimahon` |
 | **Built with** | Kotlin, Jetpack Compose, AndroidX, Kotlin Coroutines/Flow |
 | **Content** | Manga, anime, and novels |
 | **Language tools** | Dictionary lookup, OCR, pitch accent, recursive lookup, Anki mining |
